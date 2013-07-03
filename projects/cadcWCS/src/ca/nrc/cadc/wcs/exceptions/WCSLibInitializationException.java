@@ -78,13 +78,16 @@ package ca.nrc.cadc.wcs.exceptions;
 public class WCSLibInitializationException extends RuntimeException
 {
 
-    public WCSLibInitializationException(String message)
+    private int status;
+    public WCSLibInitializationException(String message, int status)
     {
-        super(message);
+        super(message + "("+status+")");
+        this.status = status;
     }
 
-    public WCSLibInitializationException(String message, Throwable cause)
+    public WCSLibInitializationException(String message, int status, Throwable cause)
     {
-        super(message, cause);
+        super(message + "("+status+")", cause);
+        this.status = status;
     }
 }

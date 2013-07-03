@@ -77,10 +77,12 @@ package ca.nrc.cadc.wcs.exceptions;
  */
 public class WCSLibRuntimeException extends RuntimeException
 {
-
-    public WCSLibRuntimeException(String message)
+    private int status;
+    
+    public WCSLibRuntimeException(String message, int status)
     {
-        super(message);
+        super(message + "("+status+")");
+        this.status = status;
     }
 
 }
