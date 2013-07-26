@@ -101,7 +101,7 @@ final class WCSLib
         }
         catch(Error e)
         {
-            throw new WCSLibInitializationException("failed to load wcsLibJNI", e);
+            throw new WCSLibInitializationException("failed to load wcsLibJNI", -1, e);
         }
     }
     
@@ -130,8 +130,10 @@ final class WCSLib
         "Ill-conditioned coordinate transformation parameters.",
         "One or more of the pixel coordinates were invalid, as indicated by the stat vector.",
         "One or more of the world coordinates were invalid, as indicated by the stat vector.",
+        //?
         "No solution found in the specified interval.",
         "Invalid subimage specification (no spectral axis).",
+        //?
         "CRPIX memory allocation failed.",
         "PC memory allocation failed.",
         "CDELT memory allocation failed.",
@@ -212,9 +214,9 @@ final class WCSLib
         if (status == 0)
             return new Result(world, worldUnits);
         else if (status > 0 && status < 12)
-            throw new WCSLibInitializationException(STATUS_ERRORS[status]);
+            throw new WCSLibInitializationException(STATUS_ERRORS[status], status);
         else
-            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12]);
+            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12], status);
     }
 
     /***
@@ -278,9 +280,9 @@ final class WCSLib
         if (status == 0)
             return new Result(pixcrd, pixcrdUnits);
         else if (status > 0 && status < 12)
-            throw new WCSLibInitializationException(STATUS_ERRORS[status]);
+            throw new WCSLibInitializationException(STATUS_ERRORS[status], status);
         else
-            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12]);
+            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12], status);
     }
 
     /***
@@ -344,9 +346,9 @@ final class WCSLib
         if (status == 0)
             return status;
         else if (status > 0 && status < 12)
-            throw new WCSLibInitializationException(STATUS_ERRORS[status]);
+            throw new WCSLibInitializationException(STATUS_ERRORS[status], status);
         else
-            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12]);
+            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12], status);
     }
 
     /**
