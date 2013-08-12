@@ -185,12 +185,12 @@ public class Transform
     private double[] crota;
     
     // Lists to hold PV & PC arrays
-    private List pviList;
-    private List pvmList;
-    private List pvvList;
-    private List psiList;
-    private List psmList;
-    private List psvList;
+    private List <Integer> pviList;
+    private List <Integer> pvmList;
+    private List <Double>  pvvList;
+    private List <Integer> psiList;
+    private List <Integer> psmList;
+    private List <String>  psvList;
 
     // force WCSLib to be loaded to we can immediately fail when JNI and native
     // loadLibrary fails
@@ -327,13 +327,13 @@ public class Transform
                 if (keywords.containsKey("PV" + axis + "_" + parameter))
                 {
                     if (pviList == null)
-                        pviList = new ArrayList();
+                        pviList = new ArrayList<Integer>();
                     pviList.add(Integer.valueOf(axis));
                     if (pvmList == null)
-                        pvmList = new ArrayList();
+                        pvmList = new ArrayList<Integer>();
                     pvmList.add(Integer.valueOf(parameter));
                     if (pvvList == null)
-                        pvvList = new ArrayList();
+                        pvvList = new ArrayList<Double>();
                     pvvList.add(new Double(keywords.getDoubleValue("PV" + axis + "_" + parameter)));
                 }
                 
@@ -341,13 +341,13 @@ public class Transform
                 if (keywords.containsKey("PS" + axis + "_" + parameter))
                 {
                     if (psi == null)
-                        psiList = new ArrayList();
+                        psiList = new ArrayList<Integer>();
                     psiList.add(Integer.valueOf(axis));
                     if (psm == null)
-                        psmList = new ArrayList();
+                        psmList = new ArrayList<Integer>();
                     psmList.add(Integer.valueOf(parameter));
                     if (psv == null)
-                        psvList = new ArrayList();
+                        psvList = new ArrayList<String>();
                     psvList.add(keywords.getStringValue("PS" + axis + "_" + parameter));
                 }
             }
@@ -508,9 +508,10 @@ public class Transform
     /**
      * Returns a list of the WCSKeywords in the form keyword = value.
      */
+    @Override
     public String toString()
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("NAXIS = ").append(naxis).append(LF);
         if (lonpole != null)
             sb.append("LONPOLE = ").append(lonpole[0]).append(LF);
@@ -591,20 +592,20 @@ public class Transform
     }
 
     // Write an Integer List to an int array.
-    private static int[] toIntArray(List integerList)
+    private static int[] toIntArray(List<Integer> integerList)
     {
 	int[] array = new int[integerList.size()];
 	for (int i = 0; i < integerList.size(); i++)
-	    array[i] = ((Integer) integerList.get(i)).intValue();
+	    array[i] = integerList.get(i).intValue();
 	return array;
     }
     
     // Write an Double List to an double array.
-    private static double[] toDoubleArray(List doubleList)
+    private static double[] toDoubleArray(List<Double> doubleList)
     {
 	double[] array = new double[doubleList.size()];
 	for (int i = 0; i < doubleList.size(); i++)
-	    array[i] = ((Double) doubleList.get(i)).doubleValue();
+	    array[i] = doubleList.get(i).doubleValue();
 	return array;
     }
     

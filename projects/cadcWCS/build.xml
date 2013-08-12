@@ -145,5 +145,13 @@
             <arg value="pix2sky"/>
         </java>
     </target>
+    
+    <!-- Only run the errors method -->
+    <target name="test-errors" depends="compile-test">
+        <java classpath="${build}/class:${build}/test/class" classname="ca.nrc.cadc.wcs.TestWCSLib" failonerror="true" fork="true">
+            <jvmarg value="-Djava.library.path=${lib.path}"/>
+            <arg value="errors"/>
+        </java>
+    </target>
 
 </project>

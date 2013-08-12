@@ -72,6 +72,8 @@ package ca.nrc.cadc.wcs;
 import ca.nrc.cadc.wcs.Transform.Result;
 import ca.nrc.cadc.wcs.exceptions.WCSLibInitializationException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This class contains the native method definitions to the WCSLIB 4.2 C routines
@@ -115,41 +117,49 @@ final class WCSLib
     /**
      * Status return values from the native code.
      * 
-     * The first ten status errors correspond to WCSLIB C status return values.
+     * The first 14 status errors correspond to WCSLIB C status return values.
      * The remaining status errors are returned by the wrapper C code.
      */
-    private static String[] STATUS_ERRORS = new String[]
-    { 
-        "Success",
-        "Null wcsprm pointer passed.",
-        "Memory allocation failed.",
-        "Linear transformation matrix is singular.",
-        "Inconsistent or unrecognized coordinate axis types.",
-        "Invalid parameter value.",
-        "Invalid coordinate transformation parameters.",
-        "Ill-conditioned coordinate transformation parameters.",
-        "One or more of the pixel coordinates were invalid, as indicated by the stat vector.",
-        "One or more of the world coordinates were invalid, as indicated by the stat vector.",
-        //?
-        "No solution found in the specified interval.",
-        "Invalid subimage specification (no spectral axis).",
-        //?
-        "CRPIX memory allocation failed.",
-        "PC memory allocation failed.",
-        "CDELT memory allocation failed.",
-        "CRVAL memory allocation failed.",
-        "CUNIT memory allocation failed.",
-        "CUNIT array index out of bounds.",
-        "CTYPE memory allocation failed.",
-        "CTYPE array index out of bounds.",
-        "PS value memory allocation failed.",
-        "PS value array index out of bounds.",
-        "CD memory allocation failed.",
-        "CROTA memory allocation failed.",
-        "Pixel array index out of bounds.",
-        "World array index out of bounds.",
-        "Result array index out of bounds."
-    };
+    private static final Map<Integer, String> ERROR_MAP = new TreeMap<Integer, String>();
+    static
+    {        
+        // Errors from wcslib C library.
+        ERROR_MAP.put(0, "Success");
+        ERROR_MAP.put(1, "Null wcsprm pointer passed");
+        ERROR_MAP.put(2, "Memory allocation failed");
+        ERROR_MAP.put(3, "Linear transformation matrix is singular");
+        ERROR_MAP.put(4, "Inconsistent or unrecognized coordinate axis types");
+        ERROR_MAP.put(5, "Invalid parameter value");
+        ERROR_MAP.put(6, "Invalid coordinate transformation parameters");
+        ERROR_MAP.put(7, "Ill-conditioned coordinate transformation parameters");
+        ERROR_MAP.put(8, "One or more of the pixel coordinates were invalid");
+        ERROR_MAP.put(9, "One or more of the world coordinates were invalid");
+        ERROR_MAP.put(10, "Invalid world coordinate");
+        ERROR_MAP.put(11, "No solution found in the specified interval");
+        ERROR_MAP.put(12, "Invalid subimage specification (no spectral axis).");
+        ERROR_MAP.put(13, "Non-separable subimage coordinate system");
+        
+        // Errors from C wrapper class.
+        ERROR_MAP.put(100, "CRPIX memory allocation failed.");
+        ERROR_MAP.put(101, "PC memory allocation failed.");
+        ERROR_MAP.put(102, "CDELT memory allocation failed.");
+        ERROR_MAP.put(103, "CRVAL memory allocation failed.");
+        ERROR_MAP.put(104, "CUNIT memory allocation failed.");
+        ERROR_MAP.put(105, "CUNIT array index out of bounds.");
+        ERROR_MAP.put(106, "CTYPE memory allocation failed.");
+        ERROR_MAP.put(107, "CTYPE array index out of bounds.");
+        ERROR_MAP.put(108, "LONPOLE memory allocation failed.");
+        ERROR_MAP.put(109, "LATPOLE memory allocation failed.");
+        ERROR_MAP.put(110, "RESTFRQ memory allocation failed.");
+        ERROR_MAP.put(111, "RESTWAV memory allocation failed.");
+        ERROR_MAP.put(112, "PS value memory allocation failed.");
+        ERROR_MAP.put(113, "PS value array index out of bounds.");
+        ERROR_MAP.put(114, "CD memory allocation failed.");
+        ERROR_MAP.put(115, "CROTA memory allocation failed.");
+        ERROR_MAP.put(116, "Pixel coordinates array index out of bounds.");
+        ERROR_MAP.put(117, "World coordinates array index out of bounds.");
+        ERROR_MAP.put(118, "Result array index out of bounds.");
+    }
 
     private WCSLib() { }
 
@@ -212,11 +222,16 @@ final class WCSLib
                             pixcrd, world, worldUnits);
 
         if (status == 0)
+        {
             return new Result(world, worldUnits);
-        else if (status > 0 && status < 12)
-            throw new WCSLibInitializationException(STATUS_ERRORS[status], status);
+        }
         else
-            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12], status);
+        {
+            String message = ERROR_MAP.get(status);
+            if (message == null)
+                message = "BUG: unknown status value returned by wcsLibJNI";
+            throw new WCSLibRuntimeException(message, status);
+        }
     }
 
     /***
@@ -278,11 +293,16 @@ final class WCSLib
                             world, pixcrd, pixcrdUnits);
 
         if (status == 0)
+        {
             return new Result(pixcrd, pixcrdUnits);
-        else if (status > 0 && status < 12)
-            throw new WCSLibInitializationException(STATUS_ERRORS[status], status);
+        }
         else
-            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12], status);
+        {
+            String message = ERROR_MAP.get(status);
+            if (message == null)
+                message = "BUG: unknown status value returned by wcsLibJNI";
+            throw new WCSLibRuntimeException(message, status);
+        }
     }
 
     /***
@@ -344,11 +364,16 @@ final class WCSLib
                             spectral_axis, spectral_ctype);
 
         if (status == 0)
+        {
             return status;
-        else if (status > 0 && status < 12)
-            throw new WCSLibInitializationException(STATUS_ERRORS[status], status);
+        }
         else
-            throw new WCSLibRuntimeException(STATUS_ERRORS[status - 12], status);
+        {
+            String message = ERROR_MAP.get(status);
+            if (message == null)
+                message = "BUG: unknown status value returned by wcsLibJNI";
+            throw new WCSLibRuntimeException(message, status);
+        }
     }
 
     /**
