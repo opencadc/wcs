@@ -78,25 +78,25 @@
 #define NCOORD 1
 
 /* Status return values */
-const int CRPIX_MEMORY_ALLOCATION_FAILED = 12;
-const int PC_MEMORY_ALLOCATION_FAILED = 13;
-const int CDELT_MEMORY_ALLOCATION_FAILED = 14;
-const int CRVAL_MEMORY_ALLOCATION_FAILED = 15;
-const int CUNIT_MEMORY_ALLOCATION_FAILED = 16;
-const int CUNIT_ARRAY_INDEX_OUT_OF_BOUNDS = 17;
-const int CTYPE_MEMORY_ALLOCATION_FAILED = 18;
-const int CTYPE_ARRAY_INDEX_OUT_OF_BOUNDS = 19;
-const int LONPOLE_MEMORY_ALLOCATION_FAILED = 20;
-const int LATPOLE_MEMORY_ALLOCATION_FAILED = 21;
-const int RESTFRQ_MEMORY_ALLOCATION_FAILED = 22;
-const int RESTWAV_MEMORY_ALLOCATION_FAILED = 23;
-const int PS_MEMORY_ALLOCATION_FAILED = 24;
-const int PS_ARRAY_INDEX_OUT_OF_BOUNDS = 25;
-const int CD_MEMORY_ALLOCATION_FAILED = 26;
-const int CROTA_MEMORY_ALLOCATION_FAILED = 27;
-const int PIXCRD_ARRAY_INDEX_OUT_OF_BOUNDS = 28;
-const int WORLD_ARRAY_INDEX_OUT_OF_BOUNDS = 29;
-const int RESULT_ARRAY_INDEX_OUT_OF_BOUNDS = 30;
+const int CRPIX_MEMORY_ALLOCATION_FAILED = 100;
+const int PC_MEMORY_ALLOCATION_FAILED = 101;
+const int CDELT_MEMORY_ALLOCATION_FAILED = 102;
+const int CRVAL_MEMORY_ALLOCATION_FAILED = 103;
+const int CUNIT_MEMORY_ALLOCATION_FAILED = 104;
+const int CUNIT_ARRAY_INDEX_OUT_OF_BOUNDS = 105;
+const int CTYPE_MEMORY_ALLOCATION_FAILED = 106;
+const int CTYPE_ARRAY_INDEX_OUT_OF_BOUNDS = 107;
+const int LONPOLE_MEMORY_ALLOCATION_FAILED = 108;
+const int LATPOLE_MEMORY_ALLOCATION_FAILED = 109;
+const int RESTFRQ_MEMORY_ALLOCATION_FAILED = 110;
+const int RESTWAV_MEMORY_ALLOCATION_FAILED = 111;
+const int PS_MEMORY_ALLOCATION_FAILED = 112;
+const int PS_ARRAY_INDEX_OUT_OF_BOUNDS = 113;
+const int CD_MEMORY_ALLOCATION_FAILED = 114;
+const int CROTA_MEMORY_ALLOCATION_FAILED = 115;
+const int PIXCRD_ARRAY_INDEX_OUT_OF_BOUNDS = 116;
+const int WORLD_ARRAY_INDEX_OUT_OF_BOUNDS = 117;
+const int RESULT_ARRAY_INDEX_OUT_OF_BOUNDS = 118;
 
 /*
  * Class:     ca_nrc_cadc_wcs_WCSLib
@@ -179,7 +179,8 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcsp2s
     wcs->flag = -1;
 
     /* Allocate memory for the wcsprm arrays */
-    if (status = wcsini(alloc, NAXIS, wcs))
+    status = wcsini(alloc, NAXIS, wcs);
+    if (status)
     {
         /* Error allocating memory, return status code */
         return status;
@@ -451,12 +452,13 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcsp2s
     /* Call native lib */
     if (!status)
     {
-        if (status = wcsp2s(wcs, NCOORD, NELEM, PIXCRD, imgcrd, phi, theta, WORLD, stat))
-        {
-        	fprintf(stderr, "ERROR %d from wcsset(): %s.\n", status, wcs_errmsg[status]);
-            /* Add 12 to status to differentiate between initialization and runtime errors */
-            status += 12;
-        }
+    	status = wcsp2s(wcs, NCOORD, NELEM, PIXCRD, imgcrd, phi, theta, WORLD, stat);
+        //if (status)
+        //{
+        //	fprintf(stderr, "ERROR %d from wcsp2s(): %s.\n", status, wcs_errmsg[status]);
+        //    /* Add 12 to status to differentiate between initialization and runtime errors */
+        //    status += 12;
+        //}
     }
 
     /* Copy coordinates back into world array */
@@ -595,7 +597,8 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcss2p
     wcs->flag = -1;
 
     /* Allocate memory for the wcsprm arrays */
-    if (status = wcsini(alloc, NAXIS, wcs))
+    status = wcsini(alloc, NAXIS, wcs);
+    if (status)
     {
         /* Error allocating memory, return status code */
         return status;
@@ -867,11 +870,13 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcss2p
     /* Call native lib */
     if (!status)
     {
-        if (status = wcss2p(wcs, NCOORD, NELEM, WORLD, phi, theta, imgcrd, PIXCRD, stat))
-        {
-            /* Add 12 to status to differentiate between initialization and runtime errors */
-            status += 12;
-        }
+    	status = wcss2p(wcs, NCOORD, NELEM, WORLD, phi, theta, imgcrd, PIXCRD, stat);
+        //if (status)
+        //{
+        //	fprintf(stderr, "ERROR %d from wcss2p(): %s.\n", status, wcs_errmsg[status]);
+        //    /* Add 12 to status to differentiate between initialization and runtime errors */
+        //    status += 12;
+        //}
     }
 
     /* Copy coordinates back into world array */
@@ -992,7 +997,8 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
     wcs->flag = -1;
 
     /* Allocate memory for the wcsprm arrays */
-    if (status = wcsini(alloc, NAXIS, wcs))
+    status = wcsini(alloc, NAXIS, wcs);
+    if (status)
     {
         /* Error allocating memory, return status code */
         return status;
@@ -1250,18 +1256,21 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
     /* Call native lib */
     if (!status)
     {
-        if (status = wcssptr(wcs, &spectral_axis, ctypeS))
-        {
-            /* Add 12 to status to differentiate between initialization and runtime errors */
-            status += 12;
-        }
+    	status = wcssptr(wcs, &spectral_axis, ctypeS);
+        //if (status)
+        //{
+        //    fprintf(stderr, "ERROR %d from wcssptr(): %s.\n", status, wcs_errmsg[status]);
+        //    /* Add 12 to status to differentiate between initialization and runtime errors */
+        //    status += 12;
+        //}
     }
 
     if (!status)
     {
-        if (status = wcsset(wcs)) {
-            status += 12;
-        }
+    	status = wcsset(wcs);
+        //if (status) {
+        //    status += 12;
+        //}
     }
 
     if (!status && LONPOLE[0] == UNDEFINED && !lonpole == UNDEFINED)
