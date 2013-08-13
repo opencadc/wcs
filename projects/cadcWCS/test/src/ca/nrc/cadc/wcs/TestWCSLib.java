@@ -92,6 +92,7 @@ public class TestWCSLib
         boolean translate = false;
         boolean vertices = false;
         boolean pix2sky = false;
+        boolean errors = false;
         
         if (args.length == 0)
         {
@@ -99,6 +100,7 @@ public class TestWCSLib
             translate = true;
             vertices = true;
             pix2sky = true;
+            errors = true;
         }
 
         for (int i = 0; i < args.length; i++)
@@ -112,6 +114,8 @@ public class TestWCSLib
                 vertices = true;
             if (arg.equals("pix2sky"))
                 pix2sky = true;
+            if (arg.equals("errors"))
+                errors = true;
         }
         
         if (wcstest)
@@ -191,6 +195,69 @@ public class TestWCSLib
             {
                 System.out.println("Keyword error: " + e.getMessage());
             }
+        }
+        
+        if (errors)
+        {
+            System.out.println("Starting errors test...");
+            
+            try
+            {
+                System.out.println("\nTest pix2sky...");
+                WCSKeywords keywords = getSingularMatrixKeywords();
+                Transform transform = new Transform(keywords);
+                Result result = transform.pix2sky( new double[] { 0.5, 0.5 });
+                throw new RuntimeException("Expected WCSLibRuntimeException");
+            }
+            catch (WCSLibRuntimeException e)
+            {
+                System.out.println("Expected exception: Linear transformation matrix is singular(3)");
+                System.out.println("  Actual exception: " + e.getMessage());
+            }
+            catch (NoSuchKeywordException e)
+            {
+                System.out.println("Keyword error: " + e.getMessage());
+            }
+            
+            try
+            {
+                System.out.println("\nTest sky2pix...");
+                WCSKeywords keywords = getSingularMatrixKeywords();
+                Transform transform = new Transform(keywords);
+                Result result = transform.sky2pix( new double[] { 0.5, 0.5 });
+                throw new RuntimeException("Expected WCSLibRuntimeException");
+            }
+            catch (WCSLibRuntimeException e)
+            {
+                System.out.println("Expected exception: Linear transformation matrix is singular(3)");
+                System.out.println("  Actual exception: " + e.getMessage());
+            }
+            catch (NoSuchKeywordException e)
+            {
+                System.out.println("Keyword error: " + e.getMessage());
+            }
+            
+            try
+            {
+                System.out.println("\nTest translate...");
+                WCSKeywords keywords = getSingularMatrixKeywords();
+                Transform transform = new Transform(keywords);
+                WCSKeywords result = transform.translate("WAVE-???");
+                throw new RuntimeException("Expected WCSLibRuntimeException");
+            }
+            catch (WCSLibRuntimeException e)
+            {
+                System.out.println("Expected exception: Linear transformation matrix is singular(3)");
+                System.out.println("  Actual exception: " + e.getMessage());
+            }
+            catch (NoSuchKeywordException e)
+            {
+                System.out.println("Keyword error: " + e.getMessage());
+            }
+            
+            
+            
+            System.out.println("\nFinished errors test...");
         }
 
     }
@@ -304,7 +371,7 @@ public class TestWCSLib
 
               if (resid > TOL)
               {
-                  StringBuffer sb = new StringBuffer();
+                  StringBuilder sb = new StringBuilder();
                   sb.append("\nClosure error:\n");
                   sb.append("world1: ");
                   sb.append(world1[k][0]).append(" ");
@@ -423,6 +490,7 @@ public class TestWCSLib
            System.out.println("   translate runtime ERROR " + re.getMessage());
         }
     }
+    
 
     private static WCSKeywords getTranslateKeywords()
     {
@@ -550,6 +618,36 @@ public class TestWCSLib
         keywords.put("NAXIS2", 185600);
 
          return keywords;
+    }
+    
+    private static WCSKeywords getSingularMatrixKeywords()
+    {
+        WCSKeywords keywords = new WCSKeywordsImpl();
+        
+        keywords.put("CD1_1", 1);
+        keywords.put("CD1_2", 0);
+        keywords.put("CD2_1", 0);
+        keywords.put("CD2_2", 0);
+
+        keywords.put("CRPIX1", 183.97113410273);
+        keywords.put("CRPIX2", 2217.53366109879);
+
+        keywords.put("CRVAL1", 76.3387499968215);
+        keywords.put("CRVAL2", -69.08717903879);
+
+        keywords.put("CTYPE1", "RA---TNX");
+        keywords.put("CTYPE2", "DEC--TNX");
+
+        keywords.put("CUNIT1", "deg");
+        keywords.put("CUNIT2", "deg");
+
+        keywords.put("EQUINOX", 2000.0);
+        keywords.put("NAXIS", 2);
+        keywords.put("NAXIS1", 8);
+        keywords.put("NAXIS2", 2248);
+        keywords.put("RADECSYS", "FK5");
+
+        return keywords;
     }
 
 }
