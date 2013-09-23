@@ -567,7 +567,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcss2p
     jdouble *CD = NULL;             /* CD cards.                                            */
     jdouble *CROTA = NULL;          /* CROTA cards.                                         */
     int i;                          /* Local variables.                                     */
-    int altlin;                     /* Alternative representations.                         */
+    int altlin = 0;                 /* Alternative representations.                         */
     int alloc = 1;                  /* Allocate memory unconditionally for the arrays       */
     int status = 0;                 /* Return status.                                       */
     struct wcsprm *wcs;             /* Pointer to wcsprm struct.                            */
@@ -984,7 +984,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
     jdouble *CD = NULL;             /* CD cards.                                            */
     jdouble *CROTA = NULL;          /* CROTA cards.                                         */
     int i;                          /* Local variables.                                     */
-    int altlin;                     /* Alternative representations.                         */
+    int altlin = 0;                 /* Alternative representations.                         */
     int alloc = 1;                  /* Allocate memory unconditionally for the arrays       */
     int status = 0;                 /* Return status.                                       */
     char ctypeS[9];                 /* Spectral ctype                                       */
