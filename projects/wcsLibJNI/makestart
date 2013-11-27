@@ -47,6 +47,8 @@
 #************************************************************************
 #-*/
 
+RELEASE_VERSION = 1475
+
 COMPILER_x86_linux = gnu
 COMPILER_x86_linux_opt = gnu
 
