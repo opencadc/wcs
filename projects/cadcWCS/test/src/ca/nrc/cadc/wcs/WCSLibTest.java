@@ -69,10 +69,15 @@
 
 package ca.nrc.cadc.wcs;
 
+import ca.nrc.cadc.util.Log4jInit;
 import ca.nrc.cadc.wcs.Transform.Result;
 import ca.nrc.cadc.wcs.exceptions.NoSuchKeywordException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibInitializationException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Port to Java of the twcs.c C method. twcs.c is used to verify the compilation
@@ -84,8 +89,38 @@ import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
  * @author jburke
  *
  */
-public class TestWCSLib
+public class WCSLibTest
 {
+    private static final Logger log = Logger.getLogger(WCSLibTest.class);
+    
+    static
+    {
+        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.INFO);
+    }
+
+    public WCSLibTest()
+    {
+    }
+    
+    @Test
+    public void testLoadJNI()
+    {
+        try
+        {
+            log.warn("TODO: run tests from here instead of main() and custom ant targets");
+        }
+        catch(UnsatisfiedLinkError err)
+        {
+            log.error("setup exception", err);
+            Assert.fail("setup exception: " + err);
+        }
+        catch(Exception unexpected)
+        {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
+        }
+    }
+    
     public static void main(String[] args)
     {
         boolean wcstest = false;
