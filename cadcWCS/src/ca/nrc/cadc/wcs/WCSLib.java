@@ -74,6 +74,8 @@ import ca.nrc.cadc.wcs.exceptions.WCSLibInitializationException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
+import org.apache.log4j.Logger;
 
 /**
  * This class contains the native method definitions to the WCSLIB 4.2 C routines
@@ -85,25 +87,19 @@ import java.util.TreeMap;
  */
 final class WCSLib
 {
-    private static Boolean loadOnce;
-
-    /**
-     * Loads the C wrapper library.
-     * Solaris and Linux systems convert the loadLibrary parameter to
-     * libwcsLibJNI.so, and look in the java.library.path for this file.
-     * A Windws system will convert and look for a file called libwcsLibJNI.dll.
-     */
+    private static final Logger log = Logger.getLogger(WCSLib.class);
+    
+    private static final UUID uuid = UUID.randomUUID();
+    
     static
     {
         try
         {
-            if (WCSLib.loadOnce == null)
-                System.loadLibrary("wcsLibJNI");
-            WCSLib.loadOnce = Boolean.TRUE;
+            NativeUtil.loadJNI(WCSLib.class.getClassLoader(), "libwcsLibJNI", uuid);
         }
-        catch(Error e)
+        catch(NativeInitializationException ex)
         {
-            throw new WCSLibInitializationException("failed to load wcsLibJNI", -1, e);
+            throw new WCSLibInitializationException("failed to load wcsLibJNI", -1, ex);
         }
     }
     
