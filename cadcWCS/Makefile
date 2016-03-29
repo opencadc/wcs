@@ -31,10 +31,25 @@ wcs = /usr
 #
 WCSLIB = $(wcs)/lib64/libwcs.so
 
+## find libwcs.so.4
+WCSLIB = $(shell locate libwcs.so.4 | head -1)
+
 #
 # Directory containing the WCSLIB headers (but not including the wcslib/ subdir).
 #
 WCSLIB_HEADERS = $(wcs)/include
+
+## find wcs/wcs.h
+WCSH = $(shell locate wcs.h)
+WCS_HEADERS = $(shell dirname $WCSH)
+WCS_HEADERS = $(shell dirname $WCSH)
+
+## find location of JNI header
+JNIH = $(shell locate jni.h)
+JNI_HEADERS = $(shell dirname $(JNIH))
+
+JNIMD = $(shell locate jni_md.h)
+JNIMD_HEADERS = $(shell dirname $(JNIMD))
 
 #
 # Compiler flags.
@@ -66,26 +81,28 @@ FLAGS = \
 # Source file.
 #
 SRC = src/wcslib.c
+OBJ = build/tmp
 
 #
 # WcsLIB javah generated header.
 #
-WCSLIB_HEADER = h/wcslib.h
+#WCSLIB_HEADER = h/wcslib.h
+WCSLIB_JNI_HEADER = build/tmp/ca_nrc_cadc_wcs_WCSLib.h
 
 #
 # Object file.
 #
-OBJECTS = obj/wcslib.o
+OBJECTS = $(OBJ)/wcslib.o
 
 #
 # Shared library file.
 #
-SHARED = lib/libwcsLibJNI.so
+SHARED = $(OBJ)/libwcsLibJNI.so
 
 #
 # Include directories for compiling
 #
-INCLUDE_PATH = -I$(WCSLIB_HEADERS)
+INCLUDE_PATH = -I$(JNI_HEADERS) -I$(JNIMD_HEADERS) -I$(WCSLIB_HEADERS)
 
 CFLAGS = \
 $(FLAGS) \
@@ -101,16 +118,14 @@ all:    mkdirs $(SHARED)
 
 .PHONY:	mkdirs
 mkdirs:	clean
-	-mkdir obj lib
+	-mkdir $(OBJ)
 
-$(SHARED): \
-	$(OBJECTS)
+$(SHARED): $(OBJECTS)
 	$(CC) -shared $(CFLAGS) $(OBJECTS) $(WCSLIB) -o $(SHARED)
 
-$(OBJECTS) : \
-	$(SRC) $(WCSLIB_HEADER)
+$(OBJECTS) : $(SRC) $(WCSLIB_HEADER)
 	$(CC) -c $(CFLAGS) $(SRC) -o $(OBJECTS)
 
 .PHONY : clean
 clean :
-	-rm -fr obj lib
+	-rm -fr $(OBJ) $(DEST)

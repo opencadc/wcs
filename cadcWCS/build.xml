@@ -87,70 +87,90 @@
 
     <property name="project" value="cadcWCS" />
 
-    <target name="build" depends="compile,jnih">
+    <property name="jars" value="${lib}/cadcUtil.jar:${ext.lib}/log4j.jar" />
+    
+    <target name="build" depends="compile,jnih,make,manifest">
         <jar jarfile="${build}/lib/${project}.jar"
+            manifest="${build}/tmp/${project}.mf"
             basedir="${build}/class" update="no">
             <include name="ca/nrc/cadc/**" />
         </jar>
+        
+        <jar jarfile="${build}/lib/${project}.jar"
+            basedir="${build}/tmp" update="yes">
+            <include name="libwcsLibJNI.so" />
+        </jar>
     </target>
 
-    <property name="jars" value="" />
-    <property name="testingJars" value="${lib}/cadcUtil.jar:${ext.lib}/log4j.jar:${ext.dev}/junit.jar"/>
+    <!-- generate manifest -->
+    <target name="manifest">
+        <pathconvert property="client.flat.manifest" pathsep=" ">
+            <mapper type="flatten"/>
+            <path> <pathelement path="${jars}"/> </path>
+        </pathconvert>
+        <pathconvert property="client.non-flat.manifest" pathsep=" ">
+            <path> <pathelement path="${ext.lib}/log4j.jar"/> </path>
+        </pathconvert>
 
-    <!-- JNI C header file -->
+        <manifest file="${build}/tmp/${project}.mf" mode="replace">
+            <attribute name="Main-Class" value="ca.nrc.cadc.wcs.Main"/>
+            <attribute name="Class-Path" value="${client.flat.manifest} ${client.non-flat.manifest}"/>
+        </manifest>
+    </target>
+    
+
+    <!-- generate the JNI C header file -->
     <target name="jnih" >
         <javah destdir="${build}/tmp" classpath="build/class" verbose="yes" >
             <class name="ca.nrc.cadc.wcs.WCSLib" />
         </javah>
     </target>
+    
+    <!-- exec make to build the JNI shared library -->
+    <target name="make" depends="jnih">
+        <exec executable="make" />
+    </target>
 
-    <!-- Library path for installed testing, T is the target architecture: if you just have a 'lib' dir then
-         make up a value for T and make a symlink so this path below exists and contains wcsLibJNI -->
-    <property name="lib.path" value="${env.CADC_PREFIX}/lib.${env.T}" />
-
-    <!-- Run the all test methods -->
-    <target name="main-test" depends="compile-test">
-        <java classpath="${build}/class:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
-            <jvmarg value="-Djava.library.path=${lib.path}"/>
+    <!-- test with the jar file instead of class dir -->
+    <property name="testingJars" value="${build}/lib/cadcWCS.jar:${lib}/cadcUtil.jar:${ext.dev}/junit.jar"/>
+    
+    <!-- override default test target since this is not (yet?) junit test code -->
+    <target name="test" depends="compile-test">
+        <java classpath="${testingJars}:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
         </java>
     </target>
 
     <!-- Only run the wcstest method -->
     <target name="test-wcstest" depends="compile-test">
-        <java classpath="${build}/class:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
-            <jvmarg value="-Djava.library.path=${lib.path}"/>
+        <java classpath="${testingJars}:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
             <arg value="wcstest"/>
         </java>
     </target>
 
     <!-- Only run the translate method -->
     <target name="test-translate" depends="compile-test">
-        <java classpath="${build}/class:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
-            <jvmarg value="-Djava.library.path=${lib.path}"/>
+        <java classpath="${testingJars}:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
             <arg value="translate"/>
         </java>
     </target>
 
     <!-- Only run the vertices method -->
     <target name="test-vertices" depends="compile-test">
-        <java classpath="${build}/class:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
-            <jvmarg value="-Djava.library.path=${lib.path}"/>
+        <java classpath="${testingJars}:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
             <arg value="vertices"/>
         </java>
     </target>
 
     <!-- Only run the pix2sky method -->
     <target name="test-pix2sky" depends="compile-test">
-        <java classpath="${build}/class:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
-            <jvmarg value="-Djava.library.path=${lib.path}"/>
+        <java classpath="${testingJars}:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
             <arg value="pix2sky"/>
         </java>
     </target>
     
     <!-- Only run the errors method -->
     <target name="test-errors" depends="compile-test">
-        <java classpath="${build}/class:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
-            <jvmarg value="-Djava.library.path=${lib.path}"/>
+        <java classpath="${testingJars}:${build}/test/class" classname="ca.nrc.cadc.wcs.WCSLibTest" failonerror="true" fork="true">
             <arg value="errors"/>
         </java>
     </target>

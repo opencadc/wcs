@@ -95,7 +95,8 @@ public class WCSLibTest
     
     static
     {
-        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.INFO);
+        // debug only adds a few lines from NativeUtil deploying the shared lib
+        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.DEBUG);
     }
 
     public WCSLibTest()
