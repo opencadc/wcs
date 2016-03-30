@@ -42,7 +42,7 @@ WCSLIB_HEADERS = $(wcs)/include
 ## find wcs/wcs.h
 WCSH = $(shell locate wcs.h)
 WCS_HEADERS = $(shell dirname $WCSH)
-WCS_HEADERS = $(shell dirname $WCSH)
+WCS_HEADERS = $(shell dirname $WCS_HEADERS)
 
 ## find location of JNI header
 JNIH = $(shell locate jni.h)
