@@ -70,43 +70,48 @@
 package ca.nrc.cadc.wcs;
 
 
-import ca.nrc.cadc.util.Log4jInit;
-import org.apache.log4j.Level;
+import ca.nrc.cadc.wcs.exceptions.NoSuchKeywordException;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author pdowler
  */
-public class Main 
+public class VerifyWCS implements Runnable
 {
-    private static final Logger log = Logger.getLogger(Main.class);
+    private static final Logger log = Logger.getLogger(VerifyWCS.class);
 
-    static
-    {
-        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.DEBUG);
-    }
+    public VerifyWCS() { }
     
-    private Main() { }
-    
-    public static void main(String[] args)
+    public void run()
     {
         try
         {
-            Class.forName("ca.nrc.cadc.wcs.WCSLib");
+            WCSKeywordsImpl wcs = new WCSKeywordsImpl();
+            wcs.put("SPECSYS", "TOPOCENT");
+            wcs.put("NAXIS", 1);
+            wcs.put("CTYPE1", "FREQ");
+            wcs.put("CUNIT1", "kHz");
+            wcs.put("NAXIS1", 1000);
+            wcs.put("CRPIX1", 0.5);
+            wcs.put("CRVAL1", 200.0);
+            wcs.put("CDELT1", 1.0); // 200-1200
+            Transform trans = new Transform(wcs);
+            trans.sky2pix( new double[] { 600.0 });
+            trans.pix2sky( new double[] { 200.0 });
+            
+            WCSKeywords kw = trans.translate("WAVE-???");
+            Transform trans2 = new Transform(kw);
+            
+            double wav = 0.5; // m
+            trans2.sky2pix( new double[] { wav });
+            trans2.pix2sky( new double[] { 200.0 });
+            log.debug("verified WCS transform");
         }
-        catch(Throwable t)
+        catch(NoSuchKeywordException bug)
         {
-            log.error("failed to load wcslib native code", t);
+            throw new RuntimeException("BUG: verify failed", bug);
         }
-        try
-        {
-            Runnable r = (Runnable) Class.forName("ca.nrc.cadc.wcs.VerifyWCS").newInstance();
-            r.run();
-        }
-        catch(Throwable t)
-        {
-            log.error("failed to verify wcslib native code", t);
-        }
+        finally { }
     }
 }
