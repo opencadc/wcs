@@ -294,7 +294,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcsp2s
         LONPOLE = (*env)->GetDoubleArrayElements(env, lonpole, NULL);
         if (LONPOLE)
         {
-        	if (LONPOLE[0] != UNDEFINED)
+//        	if (LONPOLE[0] != UNDEFINED)
         		wcs->lonpole = LONPOLE[0];
         }
         else status = LONPOLE_MEMORY_ALLOCATION_FAILED;
@@ -305,7 +305,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcsp2s
         LATPOLE = (*env)->GetDoubleArrayElements(env, latpole, NULL);
         if (LATPOLE)
         {
-        	if (LATPOLE[0] != UNDEFINED)
+//        	if (LATPOLE[0] != UNDEFINED)
         		wcs->latpole = LATPOLE[0];
         }
         else status = LATPOLE_MEMORY_ALLOCATION_FAILED;
@@ -317,7 +317,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcsp2s
         RESTFRQ = (*env)->GetDoubleArrayElements(env, restfrq, NULL);
         if (RESTFRQ)
         {
-        	if (RESTFRQ[0] != UNDEFINED)
+//        	if (RESTFRQ[0] != UNDEFINED)
         		wcs->restfrq = RESTFRQ[0];
         }
         else status = RESTFRQ_MEMORY_ALLOCATION_FAILED;
@@ -328,7 +328,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcsp2s
         RESTWAV = (*env)->GetDoubleArrayElements(env, restwav, NULL);
         if (RESTWAV)
         {
-        	if (RESTWAV[0] != UNDEFINED)
+//        	if (RESTWAV[0] != UNDEFINED)
         		wcs->restwav = RESTWAV[0];
         }
         else status = RESTWAV_MEMORY_ALLOCATION_FAILED;
@@ -712,7 +712,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcss2p
         LONPOLE = (*env)->GetDoubleArrayElements(env, lonpole, NULL);
         if (LONPOLE)
         {
-        	if (LONPOLE[0] != UNDEFINED)
+//        	if (LONPOLE[0] != UNDEFINED)
         		wcs->lonpole = LONPOLE[0];
         }
         else status = LONPOLE_MEMORY_ALLOCATION_FAILED;
@@ -723,7 +723,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcss2p
         LATPOLE = (*env)->GetDoubleArrayElements(env, latpole, NULL);
         if (LATPOLE)
         {
-        	if (LATPOLE[0] != UNDEFINED)
+//        	if (LATPOLE[0] != UNDEFINED)
         		wcs->latpole = LATPOLE[0];
         }
         else status = LATPOLE_MEMORY_ALLOCATION_FAILED;
@@ -732,10 +732,10 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcss2p
     /* Rest frequency and wavelength */
     if (!status && restfrq)
     {
-        RESTFRQ = (*env)->GetDoubleArrayElements(env, restfrq, NULL);
+//        RESTFRQ = (*env)->GetDoubleArrayElements(env, restfrq, NULL);
         if (RESTFRQ)
         {
-        	if (RESTFRQ[0] != UNDEFINED)
+//        	if (RESTFRQ[0] != UNDEFINED)
         		wcs->restfrq = RESTFRQ[0];
         }
         else status = RESTFRQ_MEMORY_ALLOCATION_FAILED;
@@ -746,7 +746,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcss2p
         RESTWAV = (*env)->GetDoubleArrayElements(env, restwav, NULL);
         if (RESTWAV)
         {
-        	if (RESTWAV[0] != UNDEFINED)
+//        	if (RESTWAV[0] != UNDEFINED)
         		wcs->restwav = RESTWAV[0];
         }
         else status = RESTWAV_MEMORY_ALLOCATION_FAILED;
@@ -1112,7 +1112,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
         LONPOLE = (*env)->GetDoubleArrayElements(env, lonpole, NULL);
         if (LONPOLE)
         {
-        	if (LONPOLE[0] != UNDEFINED)
+//        	if (LONPOLE[0] != UNDEFINED)
         		wcs->lonpole = LONPOLE[0];
         }
         else status = LONPOLE_MEMORY_ALLOCATION_FAILED;
@@ -1123,7 +1123,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
         LATPOLE = (*env)->GetDoubleArrayElements(env, latpole, NULL);
         if (LATPOLE)
         {
-        	if (LATPOLE[0] != UNDEFINED)
+//        	if (LATPOLE[0] != UNDEFINED)
         		wcs->latpole = LATPOLE[0];
         }
         else status = LATPOLE_MEMORY_ALLOCATION_FAILED;
@@ -1135,7 +1135,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
         RESTFRQ = (*env)->GetDoubleArrayElements(env, restfrq, NULL);
         if (RESTFRQ)
         {
-        	if (RESTFRQ[0] != UNDEFINED)
+//        	if (RESTFRQ[0] != UNDEFINED)
         		wcs->restfrq = RESTFRQ[0];
         }
         else status = RESTFRQ_MEMORY_ALLOCATION_FAILED;
@@ -1146,7 +1146,7 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
         RESTWAV = (*env)->GetDoubleArrayElements(env, restwav, NULL);
         if (RESTWAV)
         {
-        	if (RESTWAV[0] != UNDEFINED)
+//        	if (RESTWAV[0] != UNDEFINED)
         		wcs->restwav = RESTWAV[0];
         }
         else status = RESTWAV_MEMORY_ALLOCATION_FAILED;
@@ -1273,7 +1273,8 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
         //}
     }
 
-    if (!status && LONPOLE[0] == UNDEFINED && !lonpole == UNDEFINED)
+//    if (!status && LONPOLE[0] == UNDEFINED && !lonpole == UNDEFINED)
+    if (!status && LONPOLE)
     {
         (*env)->SetDoubleArrayRegion(env, lonpole, 0, 1, &LONPOLE[0]);
         if ((*env)->ExceptionOccurred(env))
@@ -1282,7 +1283,8 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
             status = RESULT_ARRAY_INDEX_OUT_OF_BOUNDS;
         }
     }
-    if (!status && LATPOLE[0] == UNDEFINED && !latpole == +90.0)
+//    if (!status && LATPOLE[0] == UNDEFINED && !latpole == +90.0)
+    if(!status && LATPOLE)
     {
         (*env)->SetDoubleArrayRegion(env, latpole, 0, 1, &LATPOLE[0]);
         if ((*env)->ExceptionOccurred(env))
@@ -1291,7 +1293,8 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
             status = RESULT_ARRAY_INDEX_OUT_OF_BOUNDS;
         }
     }
-    if (!status && RESTFRQ[0] == UNDEFINED && !restfrq == 0.0)
+//    if (!status && RESTFRQ[0] == UNDEFINED && !restfrq == 0.0)
+    if (!status && RESTFRQ)
     {
         (*env)->SetDoubleArrayRegion(env, restfrq, 0, 1, &RESTFRQ[0]);
         if ((*env)->ExceptionOccurred(env))
@@ -1300,7 +1303,8 @@ JNIEXPORT jint JNICALL Java_ca_nrc_cadc_wcs_WCSLib_wcssptr
             status = RESULT_ARRAY_INDEX_OUT_OF_BOUNDS;
         }
     }
-    if (!status && RESTWAV[0] == UNDEFINED && !restwav == 0.0)
+//    if (!status && RESTWAV[0] == UNDEFINED && !restwav == 0.0)
+    if (!status && RESTWAV)
     {
         (*env)->SetDoubleArrayRegion(env, restwav, 0, 1, &RESTWAV[0]);
         if ((*env)->ExceptionOccurred(env))
