@@ -75,6 +75,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 
@@ -109,7 +110,10 @@ public class NativeUtil
 
             try
             {
-                InputStream istream = url.openStream();
+                URLConnection uc = url.openConnection();
+                uc.setUseCaches(false);
+                InputStream istream = uc.getInputStream();
+                //InputStream istream = url.openStream();
                 FileOutputStream ostream = new FileOutputStream(tmp);
                 byte[] buf = new byte[65536];
                 int nb = istream.read(buf);
