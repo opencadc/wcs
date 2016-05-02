@@ -120,7 +120,7 @@
     
 
     <!-- generate the JNI C header file -->
-    <target name="jnih" >
+    <target name="jnih" depends="compile">
         <javah destdir="${build}/tmp" classpath="build/class" verbose="yes" >
             <class name="ca.nrc.cadc.wcs.WCSLib" />
         </javah>

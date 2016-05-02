@@ -45,10 +45,10 @@ WCS_HEADERS = $(shell dirname $WCSH)
 WCS_HEADERS = $(shell dirname $WCS_HEADERS)
 
 ## find location of JNI header
-JNIH = $(shell locate jni.h)
+JNIH = $(shell locate jni.h | tail -1)
 JNI_HEADERS = $(shell dirname $(JNIH))
 
-JNIMD = $(shell locate jni_md.h)
+JNIMD = $(shell locate jni_md.h | tail -1)
 JNIMD_HEADERS = $(shell dirname $(JNIMD))
 
 #
