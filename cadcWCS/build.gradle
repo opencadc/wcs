@@ -1,0 +1,77 @@
+plugins {
+  id "java"
+  id "maven"
+  id "c"
+}
+
+repositories {
+  jcenter()
+  mavenLocal()
+
+  // Only here until cadcUtil is in jcenter.
+  maven {
+    url "http://dl.bintray.com/opencadc/software"
+  }
+}
+
+version = '1.0'
+
+dependencies {
+  compile group: 'log4j', name: 'log4j', version: '1.+'
+
+  compile 'opencadc:cadcUtil:1.+'
+
+  testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+model {
+
+  platforms {
+    x64 {
+      architecture "x86_64"
+    }
+  }
+
+// can't find 'linker'
+//  toolChains {
+//    gcc(Gcc) {
+//      target('x64'){
+//        linker.executable '/usr/bin/gcc'
+//      }
+//    }
+//  }
+
+  toolChains {
+    gcc(Gcc){
+      linker.executable '/usr/bin/gcc'
+    }
+  }
+
+  components {
+    wcs(NativeLibrarySpec) {
+      binaries.withType(SharedLibraryBinarySpec) {
+          cCompiler.args "-I/usr/include/wcslib",
+            "-I/home/goliaths/Downloads/jdk1.8.0_92/include",
+            "-I/home/goliaths/Downloads/jdk1.8.0_92/include/linux",
+            "-fPIC",
+            "-fexceptions",
+            "-ansi",
+            "-std=c99",
+            "-pedantic",
+            "-Wall",
+            "-Wno-parentheses",
+            "-Wno-long-long",
+            "-Wimplicit",
+            "-D_REENTRANT",
+            "-DCOMPILE_STYLE=ANSI_C_COMPILE",
+            "-DCOMPILER_gnu",
+            "-Dx86_linux",
+            "-D_POSIX_C_SOURCE=2"
+
+          linker.args "-lwcs"
+// this make jni.h not visible again .... ?
+//          lib library: 'wcs', linkage: 'static'
+        }
+    }
+  }
+}
