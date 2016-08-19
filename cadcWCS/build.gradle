@@ -1,0 +1,137 @@
+plugins {
+  id "c"
+  id "java"
+  id "maven"
+}
+
+repositories {
+  jcenter()
+  mavenLocal()
+
+  // Only here until cadcUtil is in jcenter.
+  maven {
+    url "http://dl.bintray.com/opencadc/software"
+  }
+}
+
+version = '1.0'
+group = 'opencadc'
+sourceCompatibility = 1.7
+
+dependencies {
+  compile group: 'log4j', name: 'log4j', version: '1.+'
+
+  compile 'opencadc:cadcUtil:1.+'
+
+  testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+def tmpBuildDir = 'build/tmp'
+def usrLibDir = '/usr/lib'
+def jniLibDir = usrLibDir + '/jvm/java/include'
+
+model {
+
+  repositories {
+    libs(PrebuiltLibraries) {
+      wcsx {
+        headers.srcDir '/usr/include/wcslib'
+        binaries.withType(SharedLibraryBinary) {
+          sharedLibraryFile = file(usrLibDir + '/libwcs.so')
+        }
+      }    
+
+      jni {
+        headers.srcDirs = [jniLibDir, jniLibDir + '/linux', tmpBuildDir]
+      }
+    }
+  }
+
+  components {
+    wcsLibJNI(NativeLibrarySpec) {
+
+      sources {
+        c {
+          lib library: 'jni', linkage: 'api'
+          lib library: 'wcsx', linkage: 'shared'
+        }
+      }
+
+      binaries.all {
+        cCompiler.args '-fexceptions',
+          '-ansi',
+          '-std=c99',
+          '-pedantic',
+          '-Wall',
+          '-Wno-parentheses',
+          '-Wno-long-long',
+          '-Wimplicit',
+          '-D_REENTRANT',
+          '-DCOMPILE_STYLE=ANSI_C_COMPILE',
+          '-DCOMPILER_gnu',
+          '-Dx86_linux',
+          '-D_POSIX_C_SOURCE=2'
+      }
+
+    }
+  }
+
+}
+
+task generateJNIHeader(type:Exec) {
+  def classpath = sourceSets.main.output.classesDir
+  def classname = 'ca.nrc.cadc.wcs.WCSLib'
+  commandLine 'javah', '-d', tmpBuildDir, '-classpath', classpath, classname
+}
+
+task copySharedLibrary(type:Copy) {
+  from 'build/libs/wcsLibJNI/shared/libwcsLibJNI.so'
+  into sourceSets.main.output.classesDir
+}
+
+task assembleSharedJar(type:Jar) {
+  from(sourceSets.main.output) {
+    includes = [ '**/main/**', '**/lib*.so' ]
+  }
+}
+
+// the unit tests are a stand-alone application, and junit agnostic
+
+def testClasspath = sourceSets.test.runtimeClasspath.getAsPath()
+def testClass = 'ca.nrc.cadc.wcs.WCSLibTest'
+
+task executeWcsTest(type:Exec) {
+  commandLine 'java', '-classpath', testClasspath, testClass, 'wcstest'
+}
+
+task executeTranslateTest(type:Exec, dependsOn:executeWcsTest) {
+  commandLine 'java', '-classpath', testClasspath, testClass, 'translate'
+}
+
+task executeVerticesTest(type:Exec, dependsOn:executeTranslateTest) {
+  commandLine 'java', '-classpath', testClasspath, testClass, 'vertices'
+}
+
+task executePix2skyTest(type:Exec, dependsOn:executeVerticesTest) {
+  commandLine 'java', '-classpath', testClasspath, testClass, 'pix2sky'
+}
+
+task executeErrorTest(type:Exec, dependsOn:executePix2skyTest) {
+  commandLine 'java', '-classpath', testClasspath, testClass, 'errors'
+}
+
+task executeCLITests(dependsOn:executeErrorTest) {
+}
+
+test.finalizedBy executeCLITests
+
+// change the default order of task execution so it does:
+// - java compile,
+// - javah,
+// - .so construction,
+// - jar construction
+//
+jar.enabled = false
+classes.dependsOn generateJNIHeader
+assembleSharedJar.dependsOn copySharedLibrary
+compileTestJava.dependsOn copySharedLibrary, assembleSharedJar
