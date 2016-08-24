@@ -30,54 +30,59 @@ dependencies {
 }
 
 def tmpBuildDir = 'build/tmp'
-def usrLibDir = '/usr/lib'
-def jniLibDir = usrLibDir + '/jvm/java/include'
+def jniLibDir = '/usr/lib/jvm/java/include'
 
 model {
 
-  repositories {
-    libs(PrebuiltLibraries) {
-      wcsx {
-        headers.srcDir '/usr/include/wcslib'
-        binaries.withType(SharedLibraryBinary) {
-          sharedLibraryFile = file(usrLibDir + '/libwcs.so')
+    repositories {
+        libs(PrebuiltLibraries) {
+            wcsx {
+                headers.srcDir '/usr/include/wcslib'
+                binaries.withType(SharedLibraryBinary) {
+                    // swugly: check for libwcs.so in some places it might be
+                    sharedLibraryFile = file('/usr/lib64/libwcs.so')
+                    if (!sharedLibraryFile.exists()) {
+                        sharedLibraryFile = file('/usr/lib/libwcs.so')
+                    }
+                    if (!sharedLibraryFile.exists()) {
+                        sharedLibraryFile = file('/usr/local/lib/libwcs.so')
+                    }
+                }
+            }    
+
+            jni {
+                headers.srcDirs = [jniLibDir, jniLibDir + '/linux', tmpBuildDir]
+            }
         }
-      }    
-
-      jni {
-        headers.srcDirs = [jniLibDir, jniLibDir + '/linux', tmpBuildDir]
-      }
     }
-  }
 
-  components {
-    wcsLibJNI(NativeLibrarySpec) {
+    components {
+        wcsLibJNI(NativeLibrarySpec) {
 
-      sources {
-        c {
-          lib library: 'jni', linkage: 'api'
-          lib library: 'wcsx', linkage: 'shared'
+            sources {
+                c {
+                    lib library: 'jni', linkage: 'api'
+                    lib library: 'wcsx', linkage: 'shared'
+                }
+            }
+
+            binaries.all {
+                cCompiler.args '-fexceptions',
+                '-ansi',
+                '-std=c99',
+                '-pedantic',
+                '-Wall',
+                '-Wno-parentheses',
+                '-Wno-long-long',
+                '-Wimplicit',
+                '-D_REENTRANT',
+                '-DCOMPILE_STYLE=ANSI_C_COMPILE',
+                '-DCOMPILER_gnu',
+                '-Dx86_linux',
+                '-D_POSIX_C_SOURCE=2'
+            }
         }
-      }
-
-      binaries.all {
-        cCompiler.args '-fexceptions',
-          '-ansi',
-          '-std=c99',
-          '-pedantic',
-          '-Wall',
-          '-Wno-parentheses',
-          '-Wno-long-long',
-          '-Wimplicit',
-          '-D_REENTRANT',
-          '-DCOMPILE_STYLE=ANSI_C_COMPILE',
-          '-DCOMPILER_gnu',
-          '-Dx86_linux',
-          '-D_POSIX_C_SOURCE=2'
-      }
-
     }
-  }
 
 }
 
@@ -88,14 +93,14 @@ task generateJNIHeader(type:Exec) {
 }
 
 task copySharedLibrary(type:Copy) {
-  from 'build/libs/wcsLibJNI/shared/libwcsLibJNI.so'
-  into sourceSets.main.output.classesDir
+    // ugh: different versions of gradle put the .so in different places
+    from 'build/libs/wcsLibJNI/shared/libwcsLibJNI.so'           // gradle 3
+    from 'build/binaries/wcsLibJNISharedLibrary/libwcsLibJNI.so' // gradle 2
+    into sourceSets.main.output.classesDir
 }
 
 task assembleSharedJar(type:Jar) {
-  from(sourceSets.main.output) {
-    includes = [ '**/main/**', '**/lib*.so' ]
-  }
+  from(sourceSets.main.output)
 }
 
 // the unit tests are a stand-alone application, and junit agnostic
