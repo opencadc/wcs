@@ -203,7 +203,7 @@ public class Transform
      * Constructs a new Transform class initializing variable and array 
      * arguments to the native wrapper methods using the WCSKeywords.
      * 
-     * @param keywords implementation of WCSKeywords.
+     * @param wcs implementation of WCSKeywords.
      * @throws NoSuchKeywordException if NAXIS keyword is not found in WCSKeywords.
      */
     public Transform(WCSKeywords wcs)

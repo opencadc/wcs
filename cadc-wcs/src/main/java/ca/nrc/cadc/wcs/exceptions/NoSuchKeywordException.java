@@ -79,11 +79,11 @@ public class NoSuchKeywordException extends Exception
 {
 
     /**
-     * @param message
+     * @param keyword missing keyword name
      */
-    public NoSuchKeywordException(String message)
+    public NoSuchKeywordException(String keyword)
     {
-        super("No such keyword: " + message);
+        super("No such keyword: " + keyword);
     }
 
 }
