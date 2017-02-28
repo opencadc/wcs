@@ -104,213 +104,144 @@ public class WCSLibTest
     }
     
     @Test
-    public void testLoadJNI()
+    public void testTransform()
+    {
+        
+        try
+        {
+            WCSKeywords keywords = getTestKeywords();
+            Transform transform = new Transform(keywords);
+            doWCSTest(transform, 4);
+        }
+        catch (Exception unexpected)
+        {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
+        }
+    }
+
+    @Test
+    public void testTranslate()
     {
         try
         {
-            log.warn("TODO: run tests from here instead of main() and custom ant targets");
+            WCSKeywords keywords = getTranslateKeywords();
+
+            keywords.put("LONPOLE", 180.0D);
+            keywords.put("LATPOLE", 180.0D);
+            keywords.put("RESTWAV", 180.0D);
+
+            Transform transform = new Transform(keywords);
+            log.debug("keywords to be translated:\n " + transform.toString());
+            WCSKeywords keywords2 = transform.translate("WAVE-???");
+            Transform returned = new Transform(keywords2);
+            log.debug("translated keywords:\n " + returned.toString());
         }
-        catch(UnsatisfiedLinkError err)
-        {
-            log.error("setup exception", err);
-            Assert.fail("setup exception: " + err);
-        }
-        catch(Exception unexpected)
+        catch (Exception unexpected)
         {
             log.error("unexpected exception", unexpected);
             Assert.fail("unexpected exception: " + unexpected);
         }
     }
     
-    public static void main(String[] args)
+    @Test
+    public void testVertices()
     {
-        boolean wcstest = false;
-        boolean translate = false;
-        boolean vertices = false;
-        boolean pix2sky = false;
-        boolean errors = false;
-        
-        if (args.length == 0)
+        try
         {
-            wcstest = true;
-            translate = true;
-            vertices = true;
-            pix2sky = true;
-            errors = true;
+            WCSKeywords keywords = getVerticesKeywords();
+            Transform transform = new Transform(keywords);
+            doVertices(transform, 4);
         }
+        catch (Exception unexpected)
+        {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
+        }
+    }
 
-        for (int i = 0; i < args.length; i++)
+    @Test
+    public void testPix2Sky()
+    {
+        try
         {
-            String arg = args[i];
-            if (arg.equals("wcstest"))
-                wcstest = true;
-            if (arg.equals("translate"))
-                translate = true;
-            if (arg.equals("vertices"))
-                vertices = true;
-            if (arg.equals("pix2sky"))
-                pix2sky = true;
-            if (arg.equals("errors"))
-                errors = true;
-        }
-        
-        if (wcstest)
-        {
-            try
-            {
-                System.out.println("Starting wcs test...\n");
-                
-                WCSKeywords keywords = getTestKeywords();
-                Transform transform = new Transform(keywords);
-                doWCSTest(transform, 4);
-                
-                System.out.println("\nFinished wcs test...\n");
-            }
-            catch (NoSuchKeywordException e)
-            {
-                System.out.println("Keyword error: " + e.getMessage());
-            }
-        }
-        
-        if (translate)
-        {
-            try
-            {
-                System.out.println("Starting translate test...\n");
-                
-                WCSKeywords keywords = getTranslateKeywords();
-                
-                keywords.put("LONPOLE", 180.0D);
-                keywords.put("LATPOLE", 180.0D);
-                keywords.put("RESTWAV", 180.0D);
-                    
-                Transform transform = new Transform(keywords);
-                System.out.println("keywords to be translated:\n " + transform.toString());
-                keywords = doTranslate(transform, 1);
-                Transform returned = new Transform(keywords);
-                System.out.println("translated keywords:\n " + returned.toString());
-                System.out.println("Finished translate test...\n");
-            }
-            catch (NoSuchKeywordException e)
-            {
-                System.out.println("Keyword error: " + e.getMessage());
-            }
-        }
-        
-        if (vertices)
-        {
-            try
-            {
-                System.out.println("Starting vertices test...\n");
-                
-                WCSKeywords keywords = getVerticesKeywords();
-                Transform transform = new Transform(keywords);
-                doVertices(transform, 4);
-                
-                System.out.println("\nFinished vertices test...\n");
-            }
-            catch (NoSuchKeywordException e)
-            {
-                System.out.println("Keyword error: " + e.getMessage());
-            }
-        }
+            WCSKeywords keywords = getPix2SkyKeywords();
+            Transform transform = new Transform(keywords);
+            Result result1 = transform.pix2sky( new double[] { 0.5, 1.5 });
+            log.debug("1st transform: " + result1.coordinates[0] + "(" + result1.units[0] + "), ");
+            log.debug(result1.coordinates[1] + "(" + result1.units[1] + ")");
 
-        if (pix2sky)
-        {
-            try
-            {
-                System.out.println("Starting pix2sky test...\n");
-
-                WCSKeywords keywords = getPix2SkyKeywords();
-                Transform transform = new Transform(keywords);
-                doPix2Sky(transform, 1);
-
-                System.out.println("Finished pix2sky test...\n");
-            }
-            catch (NoSuchKeywordException e)
-            {
-                System.out.println("Keyword error: " + e.getMessage());
-            }
+            Result result2 = transform.pix2sky( new double[] { 185600 + 0.5, 185600 + 1.5 });
+            log.debug("2nd transform: " + result2.coordinates[0] + "(" + result2.units[0] + "), ");
+            log.debug(result2.coordinates[1] + "(" + result2.units[1] + ")\n");
         }
-        
-        if (errors)
+        catch (Exception unexpected)
         {
-            System.out.println("Starting errors test...");
-            
-            try
-            {
-                System.out.println("\nTest pix2sky...");
-                WCSKeywords keywords = getSingularMatrixKeywords();
-                Transform transform = new Transform(keywords);
-                Result result = transform.pix2sky( new double[] { 0.5, 0.5 });
-                throw new RuntimeException("Expected WCSLibRuntimeException");
-            }
-            catch (WCSLibRuntimeException e)
-            {
-                System.out.println("Expected exception: Linear transformation matrix is singular(3)");
-                System.out.println("  Actual exception: " + e.getMessage());
-            }
-            catch (NoSuchKeywordException e)
-            {
-                System.out.println("Keyword error: " + e.getMessage());
-            }
-            
-            try
-            {
-                System.out.println("\nTest sky2pix...");
-                WCSKeywords keywords = getSingularMatrixKeywords();
-                Transform transform = new Transform(keywords);
-                Result result = transform.sky2pix( new double[] { 0.5, 0.5 });
-                throw new RuntimeException("Expected WCSLibRuntimeException");
-            }
-            catch (WCSLibRuntimeException e)
-            {
-                System.out.println("Expected exception: Linear transformation matrix is singular(3)");
-                System.out.println("  Actual exception: " + e.getMessage());
-            }
-            catch (NoSuchKeywordException e)
-            {
-                System.out.println("Keyword error: " + e.getMessage());
-            }
-            
-            try
-            {
-                System.out.println("\nTest translate...");
-                WCSKeywords keywords = getSingularMatrixKeywords();
-                Transform transform = new Transform(keywords);
-                WCSKeywords result = transform.translate("WAVE-???");
-                throw new RuntimeException("Expected WCSLibRuntimeException");
-            }
-            catch (WCSLibRuntimeException e)
-            {
-                System.out.println("Expected exception: Linear transformation matrix is singular(3)");
-                System.out.println("  Actual exception: " + e.getMessage());
-            }
-            catch (NoSuchKeywordException e)
-            {
-                System.out.println("Keyword error: " + e.getMessage());
-            }
-            
-            
-            
-            System.out.println("\nFinished errors test...");
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
         }
-
     }
     
-    public static void doWCSTest(Transform transform, int NAXIS)
+    @Test
+    public void testErrors()
     {
-        Result result;
+        try
+        {
+            WCSKeywords keywords = getSingularMatrixKeywords();
+            Transform transform = new Transform(keywords);
+            Result result = transform.pix2sky( new double[] { 0.5, 0.5 });
+            Assert.fail("Expected WCSLibRuntimeException");
+        }
+        catch (WCSLibRuntimeException e)
+        {
+            Assert.assertEquals("pix2sky test", "Linear transformation matrix is singular(3)", e.getMessage());
+        }
+        catch (Exception unexpected)
+        {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
+        }
+            
+        try
+        {
+            WCSKeywords keywords = getSingularMatrixKeywords();
+            Transform transform = new Transform(keywords);
+            Result result = transform.sky2pix( new double[] { 0.5, 0.5 });
+            Assert.fail("Expected WCSLibRuntimeException");
+        }
+        catch (WCSLibRuntimeException e)
+        {
+            Assert.assertEquals("sky2pix test", "Linear transformation matrix is singular(3)", e.getMessage());
+        }
+        catch (Exception unexpected)
+        {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
+        }
+            
+        try
+        {
+            WCSKeywords keywords = getSingularMatrixKeywords();
+            Transform transform = new Transform(keywords);
+            WCSKeywords result = transform.translate("WAVE-???");
+            Assert.fail("Expected WCSLibRuntimeException");
+        }
+        catch (WCSLibRuntimeException e)
+        {
+            Assert.assertEquals("translate test", "Linear transformation matrix is singular(3)", e.getMessage());
+        }
+        catch (Exception unexpected)
+        {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
+        }
+    }
+
+    private static void doWCSTest(Transform transform, int NAXIS)
+    {
         int NCOORD = 361;
         int NELEM = 9;
-        double TOL = 1.0e-10;
-
-        double[][] pixel1 = new double[NCOORD][NELEM];
-        double[][] pixel2 = new double[NCOORD][NELEM];
         double[][] world1 = new double[NCOORD][NELEM];
-        double[][] world2 = new double[NCOORD][NELEM];
-        double r;
-        double resid;
         double time = 1.0;
         double freq = 1.42040595e9 - 180.0 * 62500.0;
         for (int k = 0; k < NCOORD; k++)
@@ -331,113 +262,63 @@ public class WCSLibTest
         int lng;
         double lat1;
         double lng1;
-        double residmax = 0.0;
         for (int lat = 90; lat >= -90; lat--)
         {
-           lat1 = (double) lat;
+            lat1 = (double) lat;
 
-           for (lng = -180, k = 0; lng <= 180; lng++, k++)
-           {
-              lng1 = (double) lng;
+            for (lng = -180, k = 0; lng <= 180; lng++, k++)
+            {
+               lng1 = (double) lng;
 
-              world1[k][3] = lng1;
-              world1[k][1] = lat1;
-           }
+               world1[k][3] = lng1;
+               world1[k][1] = lat1;
+            }
              
-           System.out.println("Testing with lat1 = " + lat1);
+            // sky -> pix -> sky and then compare
+            Result pixel1 = null;
+            try
+            {
+               pixel1 = transform.sky2pix(world1[0]);
+               Assert.assertNotNull(pixel1);
+               Assert.assertNotNull(pixel1.coordinates);
+            }
+            catch (Exception unexpected)
+            {
+                log.error("unexpected exception", unexpected);
+                Assert.fail("unexpected exception: " + unexpected);
+            }
            
-           try
-           {
-               result = transform.sky2pix(world1[0]);
+            Result sky1 = null;
+            try
+            {
+               sky1 = transform.pix2sky(pixel1.coordinates);
+               Assert.assertNotNull(sky1);
+               Assert.assertNotNull(sky1.coordinates);
+               
+               // world1 == sky1
+            }
+            catch (Exception unexpected)
+            {
+                log.error("unexpected exception", unexpected);
+                Assert.fail("unexpected exception: " + unexpected);
+            }
 
-           }
-           catch (WCSLibInitializationException ie)
-           {
-              System.out.println("   sky2pix(1) init ERROR (lat1 = " + lat1 + ") " + ie.getMessage());
-              break;
-           }
-           catch (WCSLibRuntimeException re)
-           {
-              System.out.println("   sky2pix(1) runtime ERROR (lat1 = " + lat1 + ") " + re.getMessage());
-              break;
-           }
-           
-           
-           try
-           {
-               result = transform.pix2sky(result.coordinates);
-           }
-           catch (WCSLibInitializationException ie)
-           {
-              System.out.println("   pix2sky init ERROR (lat1 = " + lat1 + ") " + ie.getMessage());
-              break;
-           }
-           catch (WCSLibRuntimeException re)
-           {
-              System.out.println("   pix2sky runtime ERROR (lat1 = " + lat1 + ") " + re.getMessage());
-              break;
-           }
-
-           try
-           {
-               result = transform.sky2pix(result.coordinates);
-           }
-           catch (WCSLibInitializationException ie)
-           {
-              System.out.println("   sky2pix(2) init ERROR (lat1 = " + lat1 + ") " + ie.getMessage());
-              break;
-           }
-           catch (WCSLibRuntimeException re)
-           {
-              System.out.println("   sky2pix(2) runtime ERROR (lat1 = " + lat1 + ") " + re.getMessage());
-              break;
-           }
-            
-           for (k = 0; k < NCOORD; k++)
-           {
-              resid = 0.0;
-              for (int i = 0; i < NAXIS; i++)
-              {
-                r = pixel2[k][i] - pixel1[k][i];
-                resid += r*r;
-              }
-
-              resid = Math.sqrt(resid);
-              if (resid > residmax) residmax = resid;
-
-              if (resid > TOL)
-              {
-                  StringBuilder sb = new StringBuilder();
-                  sb.append("\nClosure error:\n");
-                  sb.append("world1: ");
-                  sb.append(world1[k][0]).append(" ");
-                  sb.append(world1[k][1]).append(" ");
-                  sb.append(world1[k][2]).append(" ");
-                  sb.append(world1[k][3]).append(" ");
-                  sb.append("\n");
-                  sb.append("pixel1: ");
-                  sb.append(pixel1[k][0]).append(" ");
-                  sb.append(pixel1[k][1]).append(" ");
-                  sb.append(pixel1[k][2]).append(" ");
-                  sb.append(pixel1[k][3]).append(" ");
-                  sb.append("\n");
-                  sb.append("world2: ");
-                  sb.append(world2[k][0]).append(" ");
-                  sb.append(world2[k][1]).append(" ");
-                  sb.append(world2[k][2]).append(" ");
-                  sb.append(world2[k][3]).append(" ");
-                  sb.append("\n");
-                  sb.append("pixel2: ");
-                  sb.append(pixel2[k][0]).append(" ");
-                  sb.append(pixel2[k][1]).append(" ");
-                  sb.append(pixel2[k][2]).append(" ");
-                  sb.append(pixel2[k][3]).append(" ");
-                  sb.append("\n");
-                  System.out.println(sb.toString());
-              }
-           }
+            // what is the point of this?
+            Result pixel2 = null;
+            try
+            {
+                pixel2 = transform.sky2pix(sky1.coordinates);
+                Assert.assertNotNull(pixel2);
+                Assert.assertNotNull(pixel2.coordinates);
+                
+                // pixel1 == pixel2?
+            }
+            catch (Exception unexpected)
+            {
+                log.error("unexpected exception", unexpected);
+                Assert.fail("unexpected exception: " + unexpected);
+            }
         }
-        System.out.println("Test completed.");
     }
 
     private static void doVertices(Transform transform, int NAXIS)
@@ -449,83 +330,52 @@ public class WCSLibTest
             pixel[0] = 0.5;
             pixel[1] = 0.5;
             Result result = transform.pix2sky(pixel);
-            System.out.print(pixel [0] +", " +  pixel[1] + " -> ");
-            System.out.print( + result.coordinates[0] + ", " + result.coordinates[1]);
-            System.out.println(" units(" + result.units[0] + ", " + result.units[1] + ")");
+            Assert.assertNotNull(result);
+            Assert.assertNotNull(result.coordinates);
+            Assert.assertNotNull(result.units);
+            log.debug(pixel [0] +", " +  pixel[1] + " -> ");
+            log.debug( + result.coordinates[0] + ", " + result.coordinates[1]);
+            log.debug(" units(" + result.units[0] + ", " + result.units[1] + ")");
 
             pixel[0] = 0.5;
             pixel[1] = 2248.5;
             result = transform.pix2sky(pixel);
-            System.out.print(pixel [0] +", " +  pixel[1] + " -> ");
-            System.out.print( + result.coordinates[0] + ", " + result.coordinates[1]);
-            System.out.println(" units(" + result.units[0] + ", " + result.units[1] + ")");
+            Assert.assertNotNull(result);
+            Assert.assertNotNull(result.coordinates);
+            Assert.assertNotNull(result.units);
+            log.debug(pixel [0] +", " +  pixel[1] + " -> ");
+            log.debug( + result.coordinates[0] + ", " + result.coordinates[1]);
+            log.debug(" units(" + result.units[0] + ", " + result.units[1] + ")");
 
             pixel[0] = 8.5;
             pixel[1] = 2248.5;
             result = transform.pix2sky(pixel);
-            System.out.print(pixel [0] +", " +  pixel[1] + " -> ");
-            System.out.print( + result.coordinates[0] + ", " + result.coordinates[1]);
-            System.out.println(" units(" + result.units[0] + ", " + result.units[1] + ")");
+            Assert.assertNotNull(result);
+            Assert.assertNotNull(result.coordinates);
+            Assert.assertNotNull(result.units);
+            log.debug(pixel [0] +", " +  pixel[1] + " -> ");
+            log.debug( + result.coordinates[0] + ", " + result.coordinates[1]);
+            log.debug(" units(" + result.units[0] + ", " + result.units[1] + ")");
 
             pixel[0] = 8.5;
             pixel[1] = 0.5;
             result = transform.pix2sky(pixel);
-            System.out.print(pixel [0] +", " +  pixel[1] + " -> ");
-            System.out.print( + result.coordinates[0] + ", " + result.coordinates[1]);
-            System.out.println(" units(" + result.units[0] + ", " + result.units[1] + ")");
+            Assert.assertNotNull(result);
+            Assert.assertNotNull(result.coordinates);
+            Assert.assertNotNull(result.units);
+            log.debug(pixel [0] +", " +  pixel[1] + " -> ");
+            log.debug( + result.coordinates[0] + ", " + result.coordinates[1]);
+            log.debug(" units(" + result.units[0] + ", " + result.units[1] + ")");
 
         }
-        catch (WCSLibInitializationException ie)
+        catch (Exception unexpected)
         {
-           System.out.println("   pix2sky init ERROR " + ie.getMessage());
-        }
-        catch (WCSLibRuntimeException re)
-        {
-           System.out.println("   pix2sky runtime ERROR " + re.getMessage());
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
         }
     }
     
-    private static WCSKeywords doTranslate(Transform transform, int NAXIS)
-    {
-        WCSKeywords keywords = null;
-        try
-        {
-            //transform.translate("FREQ-???");
-            keywords = transform.translate("WAVE-???");
-        }
-        catch (WCSLibInitializationException ie)
-        {
-           System.out.println("   translate init ERROR " + ie.getMessage());
-        }
-        catch (WCSLibRuntimeException re)
-        {
-           System.out.println("   translate runtime ERROR " + re.getMessage());
-        }
-        return keywords;
-    }
-
-    private static void doPix2Sky(Transform transform, int NAXIS)
-    {
-        try
-        {
-            System.out.println("keywords:\n" + transform.toString());
-            Result result = transform.pix2sky( new double[] { 0.5, 1.5 });
-            System.out.print("1st transform: " + result.coordinates[0] + "(" + result.units[0] + "), ");
-            System.out.println(result.coordinates[1] + "(" + result.units[1] + ")");
-
-            result = transform.pix2sky( new double[] { 185600 + 0.5, 185600 + 1.5 });
-            System.out.print("2nd transform: " + result.coordinates[0] + "(" + result.units[0] + "), ");
-            System.out.println(result.coordinates[1] + "(" + result.units[1] + ")\n");
-        }
-        catch (WCSLibInitializationException ie)
-        {
-           System.out.println("   translate init ERROR " + ie.getMessage());
-        }
-        catch (WCSLibRuntimeException re)
-        {
-           System.out.println("   translate runtime ERROR " + re.getMessage());
-        }
-    }
+    
     
 
     private static WCSKeywords getTranslateKeywords()

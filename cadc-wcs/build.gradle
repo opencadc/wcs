@@ -103,36 +103,6 @@ task assembleSharedJar(type:Jar) {
   from(sourceSets.main.output)
 }
 
-// the unit tests are a stand-alone application, and junit agnostic
-
-def testClasspath = sourceSets.test.runtimeClasspath.getAsPath()
-def testClass = 'ca.nrc.cadc.wcs.WCSLibTest'
-
-task executeWcsTest(type:Exec) {
-  commandLine 'java', '-classpath', testClasspath, testClass, 'wcstest'
-}
-
-task executeTranslateTest(type:Exec, dependsOn:executeWcsTest) {
-  commandLine 'java', '-classpath', testClasspath, testClass, 'translate'
-}
-
-task executeVerticesTest(type:Exec, dependsOn:executeTranslateTest) {
-  commandLine 'java', '-classpath', testClasspath, testClass, 'vertices'
-}
-
-task executePix2skyTest(type:Exec, dependsOn:executeVerticesTest) {
-  commandLine 'java', '-classpath', testClasspath, testClass, 'pix2sky'
-}
-
-task executeErrorTest(type:Exec, dependsOn:executePix2skyTest) {
-  commandLine 'java', '-classpath', testClasspath, testClass, 'errors'
-}
-
-task executeCLITests(dependsOn:executeErrorTest) {
-}
-
-test.finalizedBy executeCLITests
-
 // change the default order of task execution so it does:
 // - java compile,
 // - javah,
