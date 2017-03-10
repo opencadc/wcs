@@ -24,7 +24,7 @@ public class SpatialTest
 
     static
     {
-        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.DEBUG);
+        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.INFO);
     }
 
     public SpatialTest()
@@ -61,7 +61,7 @@ public class SpatialTest
             double[] pix = new double[2];
             pix[0] = 500.0;
             pix[1] = 500.0;
-            Transform.Result result =trans.pix2sky(pix);
+            Transform.Result result = trans.pix2sky(pix);
             Assert.assertNotNull(result);
             Assert.assertNotNull(result.coordinates);
             Assert.assertEquals(2, result.coordinates.length);
@@ -109,15 +109,15 @@ public class SpatialTest
             double[] pix = new double[2];
             pix[0] = 580.0; // centre
             pix[1] = 966.0; // centre
-            Transform.Result result =trans.pix2sky(pix);
+            Transform.Result result = trans.pix2sky(pix);
             Assert.assertNotNull(result);
             Assert.assertNotNull(result.coordinates);
             Assert.assertEquals(2, result.coordinates.length);
             
             log.info("testHPX " + pix[0] + "," + pix[1] + " -> " + result.coordinates[0] + "," + result.coordinates[1]);
             // expected values from manual use of astropy+wcslib-5.x
-            Assert.assertEquals("RA center",  63.418925, result.coordinates[0], 1.0e-6);
-            Assert.assertEquals("DEC center", 28.113975, result.coordinates[1], 1.0e-6);
+            Assert.assertEquals("RA center",  63.418925, result.coordinates[0], 0.001);
+            Assert.assertEquals("DEC center", 28.113975, result.coordinates[1], 0.001);
             
         }
         catch(Exception unexpected)
