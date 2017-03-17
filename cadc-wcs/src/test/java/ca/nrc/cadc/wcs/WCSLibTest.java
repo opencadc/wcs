@@ -71,8 +71,6 @@ package ca.nrc.cadc.wcs;
 
 import ca.nrc.cadc.util.Log4jInit;
 import ca.nrc.cadc.wcs.Transform.Result;
-import ca.nrc.cadc.wcs.exceptions.NoSuchKeywordException;
-import ca.nrc.cadc.wcs.exceptions.WCSLibInitializationException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -96,7 +94,7 @@ public class WCSLibTest
     static
     {
         // debug only adds a few lines from NativeUtil deploying the shared lib
-        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.DEBUG);
+        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.INFO);
     }
 
     public WCSLibTest()
