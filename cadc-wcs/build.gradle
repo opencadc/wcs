@@ -16,7 +16,7 @@ repositories {
 
 sourceCompatibility = 1.8
 group = 'org.opencadc'
-version = '2.0'
+version = '3.0'
 
 dependencies {
     compile 'log4j:log4j:1.2.17'
@@ -50,31 +50,18 @@ def getSOFileLocation() {
         throw new Error("No WCS SO file found.")
     }
 
-//    copy {
-//        from soFile
-//        into dir
-//    }
-    return soFile.absolutePath
-}
-
-def copySOFile() {
-    def soFileLocation = getSOFileLocation()
-    copy {
-        from soFileLocation
-        into "./"
-    }
+    return soFile
 }
 
 model {
     repositories {
         libs(PrebuiltLibraries) {
-//            cadcwcs {
-//                binaries.withType(SharedLibraryBinary) {
-//                    // swugly: check for libwcs.so in some places it might be
-//                    copySOFile()
-//                    sharedLibraryFile = file("libwcs.so")
-//                }
-//            }
+           wcsx {
+               binaries.withType(SharedLibraryBinary) {
+                   // swugly: check for libwcs.so in some places it might be
+                   sharedLibraryFile = getSOFileLocation()
+               }
+           }
 
             jni {
                 headers.srcDirs = [baseHeadersDir, baseHeadersDir + "/linux", tmpBuildDir]
@@ -88,7 +75,7 @@ model {
             sources {
                 c {
                     lib library: 'jni', linkage: 'api'
-//                    lib library: 'cadcwcs', linkage: 'shared'
+                    lib library: 'wcsx', linkage: 'shared'
                 }
             }
 
@@ -119,9 +106,7 @@ task generateJniHeaders(type: JavaCompile) {
 }
 
 task copySharedLibrary(type: Copy) {
-    def soFileLocation = getSOFileLocation()
     from "${buildDir}/libs/wcsLibJNI/shared/libwcsLibJNI.so"           // gradle >= 3
-    from soFileLocation
     into file("${buildDir}/classes/java/main/")
 }
 
