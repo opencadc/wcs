@@ -1,0 +1,125 @@
+import org.gradle.internal.jvm.Jvm
+
+plugins {
+    id 'c'
+    id 'java'
+    id 'maven'
+    id 'application'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = 1.8
+group = 'org.opencadc'
+version = '2.1.0'
+
+dependencies {
+    implementation 'log4j:log4j:1.2.17'
+    implementation 'org.opencadc:cadc-util:[1.3.13,2.0.0)'
+    implementation 'org.opencadc:cadc-log:[1.1.3,2.0.0)'
+
+    testImplementation 'junit:junit:[4.13,5.0]'
+}
+
+def tmpBuildDir = 'build/tmp'
+def baseHeadersDir = "${Jvm.current().javaHome}/include"
+
+test {
+    systemProperty "java.library.path", "/usr/local/lib:/usr/lib:/usr/lib64:" + System.getProperty("java.io.tmpdir")
+}
+
+def getSOFileLocation() {
+    def soFile = file('/usr/lib64/libwcs.so')
+    if (!soFile.exists()) {
+        soFile = file('/usr/lib/libwcs.so')
+    }
+
+    if (!soFile.exists()) {
+        soFile = file('/usr/local/lib/libwcs.so')
+    }
+
+    if (!soFile.exists()) {
+        soFile = file('/usr/lib/x86_64-linux-gnu/libwcs.so')
+    }
+
+    if (!soFile.exists()) {
+        throw new Error("No WCS SO file found.")
+    }
+
+    return soFile
+}
+
+model {
+    repositories {
+        libs(PrebuiltLibraries) {
+           wcsx {
+               binaries.withType(SharedLibraryBinary) {
+                   // swugly: check for libwcs.so in some places it might be
+                   sharedLibraryFile = getSOFileLocation()
+               }
+           }
+
+            jni {
+                headers.srcDirs = [baseHeadersDir, baseHeadersDir + "/linux", tmpBuildDir]
+            }
+        }
+    }
+
+    components {
+        wcsLibJNI(NativeLibrarySpec) {
+
+            sources {
+                c {
+                    lib library: 'jni', linkage: 'api'
+                    lib library: 'wcsx', linkage: 'shared'
+                }
+            }
+
+            // Linux compatible flags only.  This will likely never run on MacOS or Windows due to linkage issues.
+            binaries.all {
+                cCompiler.args '-fexceptions',
+                        '-ansi',
+                        '-std=c99',
+                        '-pedantic',
+                        '-Wall',
+                        '-Dx86_linux',
+                        '-D_POSIX_C_SOURCE=2',
+                        '-D_FILE_OFFSET_BITS=64'
+            }
+        }
+    }
+}
+
+task generateJniHeaders(type: JavaCompile) {
+    classpath = sourceSets.main.compileClasspath
+    destinationDir file("${tmpBuildDir}")
+    source = sourceSets.main.java
+    options.compilerArgs += [
+            '-h', file("${tmpBuildDir}"),
+            '-d', file("${tmpBuildDir}")
+    ]
+}
+
+task copySharedLibrary(type: Copy) {
+    from "${buildDir}/libs/wcsLibJNI/shared/libwcsLibJNI.so"           // gradle >= 3
+    into file("${buildDir}/classes/java/main/")
+}
+
+task assembleSharedJar(type: Jar) {
+    from(sourceSets.main.output)
+}
+
+// change the default order of task execution so it does:
+// - java compile,
+// - javah,
+// - .so construction,
+// - jar construction
+//
+jar.enabled = false
+classes.dependsOn generateJniHeaders
+assembleSharedJar.dependsOn copySharedLibrary
+compileTestJava.dependsOn copySharedLibrary, assembleSharedJar
