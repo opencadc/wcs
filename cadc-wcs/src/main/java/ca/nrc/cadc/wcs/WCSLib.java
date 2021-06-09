@@ -8,7 +8,7 @@
 *  National Research Council            Conseil national de recherches
 *  Ottawa, Canada, K1A 0R6              Ottawa, Canada, K1A 0R6
 *  All rights reserved                  Tous droits réservés
-*                                       
+*
 *  NRC disclaims any warranties,        Le CNRC dénie toute garantie
 *  expressed, implied, or               énoncée, implicite ou légale,
 *  statutory, of any kind with          de quelque nature que ce
@@ -31,10 +31,10 @@
 *  software without specific prior      de ce logiciel sans autorisation
 *  written permission.                  préalable et particulière
 *                                       par écrit.
-*                                       
+*
 *  This file is part of the             Ce fichier fait partie du projet
 *  OpenCADC project.                    OpenCADC.
-*                                       
+*
 *  OpenCADC is free software:           OpenCADC est un logiciel libre ;
 *  you can redistribute it and/or       vous pouvez le redistribuer ou le
 *  modify it under the terms of         modifier suivant les termes de
@@ -44,7 +44,7 @@
 *  either version 3 of the              : soit la version 3 de cette
 *  License, or (at your option)         licence, soit (à votre gré)
 *  any later version.                   toute version ultérieure.
-*                                       
+*
 *  OpenCADC is distributed in the       OpenCADC est distribué
 *  hope that it will be useful,         dans l’espoir qu’il vous
 *  but WITHOUT ANY WARRANTY;            sera utile, mais SANS AUCUNE
@@ -54,7 +54,7 @@
 *  PURPOSE.  See the GNU Affero         PARTICULIER. Consultez la Licence
 *  General Public License for           Générale Publique GNU Affero
 *  more details.                        pour plus de détails.
-*                                       
+*
 *  You should have received             Vous devriez avoir reçu une
 *  a copy of the GNU Affero             copie de la Licence Générale
 *  General Public License along         Publique GNU Affero avec
@@ -72,53 +72,77 @@ package ca.nrc.cadc.wcs;
 import ca.nrc.cadc.wcs.Transform.Result;
 import ca.nrc.cadc.wcs.exceptions.WCSLibInitializationException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
+
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 import org.apache.log4j.Logger;
 
 /**
  * This class contains the native method definitions to the WCSLIB 4.2 C routines
- * wcss2p() and wcsp2s(), and provides package level access to methods implementing 
+ * wcss2p() and wcsp2s(), and provides package level access to methods implementing
  * the native definitions.
- * 
+ *
  * @author jburke
  *
  */
 final class WCSLib
 {
-    private static final Logger log = Logger.getLogger(WCSLib.class);
-    
-    private static final UUID uuid = UUID.randomUUID();
-    
+    private static final Logger LOGGER = Logger.getLogger(WCSLib.class);
+    private static final int[] WCS_LIB_MAJOR_VERSIONS = new int[] {
+        5, 6, 7
+    };
+
     static
     {
-        try
-        {
-            NativeUtil.loadJNI(WCSLib.class.getClassLoader(), "libwcsLibJNI", uuid);
-        }
-        catch(NativeInitializationException ex)
-        {
-            throw new WCSLibInitializationException("failed to load wcsLibJNI", -1, ex);
-        }
+        LOGGER.info("Loaded WCSLib major version " + WCSLib.loadNativeLibrary());
     }
-    
+
     /**
-     * Constant used to represent a null or unitialized value.
-     * Taken the wcslib wcsmath.h.
+     * Constant used to represent a null or uninitialized value.
+     * Taken the WCSLib wcsmath.h.
      * #define UNDEFINED 987654321.0e99
      */
     protected static double UNDEFINED = 987654321.0e99;
-    
+
+    /**
+     * Load and return the located version.
+     *
+     * @return  The major version.
+     * @throws WCSLibInitializationException    If none found.
+     */
+    private static int loadNativeLibrary() throws WCSLibInitializationException {
+        for (int wcsLibMajorVersion : WCS_LIB_MAJOR_VERSIONS) {
+            try
+            {
+                LOGGER.info("Checking libWCS major version " + wcsLibMajorVersion);
+                NativeUtil.loadJNI(WCSLib.class.getClassLoader(), "libwcsLibJNI." + wcsLibMajorVersion);
+
+                // Found one that is valid.
+                LOGGER.info("Checking libWCS major version " + wcsLibMajorVersion + ": OK");
+
+                return wcsLibMajorVersion;
+            }
+            catch (NativeInitializationException ex)
+            {
+                LOGGER.info("Checking libWCS major version " + wcsLibMajorVersion + ": NO");
+                // Check next version.
+            }
+        }
+
+        throw new WCSLibInitializationException("failed to load wcsLibJNI (checked WCSLib versions: "
+                                                + Arrays.toString(WCS_LIB_MAJOR_VERSIONS) + ")", -1);
+    }
+
     /**
      * Status return values from the native code.
-     * 
+     *
      * The first 14 status errors correspond to WCSLIB C status return values.
      * The remaining status errors are returned by the wrapper C code.
      */
-    private static final Map<Integer, String> ERROR_MAP = new TreeMap<Integer, String>();
+    private static final Map<Integer, String> ERROR_MAP = new TreeMap<>();
     static
-    {        
+    {
         // Errors from wcslib C library.
         ERROR_MAP.put(0, "Success");
         ERROR_MAP.put(1, "Null wcsprm pointer passed");
@@ -134,7 +158,7 @@ final class WCSLib
         ERROR_MAP.put(11, "No solution found in the specified interval");
         ERROR_MAP.put(12, "Invalid subimage specification (no spectral axis).");
         ERROR_MAP.put(13, "Non-separable subimage coordinate system");
-        
+
         // Errors from C wrapper class.
         ERROR_MAP.put(100, "CRPIX memory allocation failed.");
         ERROR_MAP.put(101, "PC memory allocation failed.");
@@ -162,7 +186,7 @@ final class WCSLib
     /***
      * Transforms pixel coordinates to world coordinates using the
      * native WCSLIB wcsp2s() C method.
-     * 
+     *
      * @param naxis NAXIS - Number of axes in WCS description.
      * @param crpix CRPIXi - Pixel coordinate of the reference point.
      * @param pc PCi_j - Pixel coordinate transformation matrix.
@@ -213,8 +237,8 @@ final class WCSLib
     {
         double[] world = new double[pixcrd.length];
         String[] worldUnits = new String[pixcrd.length];
-        int status = wcsp2s(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole, 
-                            restfrq, restwav, pvi, pvm, pvv, psi, psm, psv, cd, crota, 
+        int status = wcsp2s(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole,
+                            restfrq, restwav, pvi, pvm, pvv, psi, psm, psv, cd, crota,
                             pixcrd, world, worldUnits);
 
         if (status == 0)
@@ -233,7 +257,7 @@ final class WCSLib
     /***
      * Transforms world coordinates to pixel coordinates using the
      * native WCSLIB wcss2p() C method.
-     * 
+     *
      * @param naxis NAXIS - Number of axes in WCS description.
      * @param crpix CRPIXi - Pixel coordinate of the reference point.
      * @param pc PCi_j - Pixel coordinate transformation matrix.
@@ -284,8 +308,8 @@ final class WCSLib
     {
         double[] pixcrd = new double[world.length];
         String[] pixcrdUnits = new String[pixcrd.length];
-        int status = wcss2p(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole, 
-                            restfrq, restwav, pvi, pvm, pvv, psi, psm, psv, cd, crota, 
+        int status = wcss2p(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole,
+                            restfrq, restwav, pvi, pvm, pvv, psi, psm, psv, cd, crota,
                             world, pixcrd, pixcrdUnits);
 
         if (status == 0)
@@ -304,7 +328,7 @@ final class WCSLib
     /***
      * Transforms world coordinates to pixel coordinates using the
      * native WCSLIB wcss2p() C method.
-     * 
+     *
      * @param naxis NAXIS - Number of axes in WCS description.
      * @param crpix CRPIXi - Pixel coordinate of the reference point.
      * @param pc PCi_j - Pixel coordinate transformation matrix.
@@ -324,7 +348,8 @@ final class WCSLib
      * @param psv PSi_ma - Parameter value.
      * @param cd CDi_j - Spectrum coordinate matrix.
      * @param crota CROTAi - Coordinate rotation.
-     * @param world World coordinates.
+     * @param spectral_axis Spectral axis (set to -1 to allow wcslib to locate).
+     * @param spectral_ctype Desired spectral ctype.
      * @return Pixel coordinates.
      * @throws WCSLibInitializationException if initialization of the WCSLIB C wcsprm struct fails.
      * @throws WCSLibRuntimeException if WCSLIB method execution fails.
@@ -355,8 +380,8 @@ final class WCSLib
     )
     {
 
-        int status = wcssptr(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole, 
-                            restfrq, restwav, pvi, pvm, pvv, psi, psm, psv, cd, crota, 
+        int status = wcssptr(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole,
+                            restfrq, restwav, pvi, pvm, pvv, psi, psm, psv, cd, crota,
                             spectral_axis, spectral_ctype);
 
         if (status == 0)
@@ -375,10 +400,10 @@ final class WCSLib
     /**
      * Native method to transforms pixel coordinates to world coordinates
      * using the WCSLIB 4.2 wcsp2s() C method.
-     * 
+     *
      * @return native method status value, 0 indicates success, other values
      *         indicate a problem during method exection. The STATUS_ERRORS
-     *         array maps the status value to an error message.  
+     *         array maps the status value to an error message.
      */
     private static native int wcsp2s
     (
@@ -409,10 +434,10 @@ final class WCSLib
     /**
      * Native method to transforms world coordinates to pixel coordinates
      * using the WCSLIB 4.2 wcss2p() C method.
-     * 
+     *
      * @return native method status value, 0 indicates success, other values
      *         indicate a problem during method exection. The STATUS_ERRORS
-     *         array maps the status value to an error message.  
+     *         array maps the status value to an error message.
      */
     private static native int wcss2p
     (
@@ -443,10 +468,10 @@ final class WCSLib
     /**
      * Native method to translate the spectral axis in a wcsprm struct
      * using the WCSLIB 4.2 wcssptr() C method.
-     * 
+     *
      * @return native method status value, 0 indicates success, other values
      *         indicate a problem during method exection. The STATUS_ERRORS
-     *         array maps the status value to an error message.  
+     *         array maps the status value to an error message.
      */
     private static native int wcssptr
     (

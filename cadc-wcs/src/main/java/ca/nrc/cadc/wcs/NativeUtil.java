@@ -89,11 +89,12 @@ public class NativeUtil
 
     private NativeUtil() { }
     
-    static void loadJNI(ClassLoader cl, String name, UUID uuid)
+    static void loadJNI(ClassLoader cl, String name)
         throws NativeInitializationException
     {
+        final UUID uuid = UUID.randomUUID();
         File tmpdir = new File(System.getProperty("java.io.tmpdir"));
-        File tmp = new File(tmpdir, name + "-" + uuid.toString() + ".so");
+        File tmp = new File(tmpdir, name + "-" + uuid + ".so");
         
         try
         {
@@ -141,7 +142,7 @@ public class NativeUtil
         }
         catch (Error e)
         {
-            log.error("failed to load shared lib", e);
+            log.error("failed to load shared library: " + tmp);
             throw new NativeInitializationException("failed to load shared lib: " + name, e);
         }
     }
