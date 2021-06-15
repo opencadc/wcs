@@ -73,7 +73,7 @@ import ca.nrc.cadc.wcs.Transform.Result;
 import ca.nrc.cadc.wcs.exceptions.WCSLibInitializationException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.log4j.Logger;
@@ -89,9 +89,7 @@ import org.apache.log4j.Logger;
 final class WCSLib
 {
     private static final Logger LOGGER = Logger.getLogger(WCSLib.class);
-    private static final int[] WCS_LIB_MAJOR_VERSIONS = new int[] {
-        5, 6, 7
-    };
+    private static final String JNI_SO_PREFIX = "libwcsLibJNI";
 
     static
     {
@@ -108,30 +106,36 @@ final class WCSLib
     /**
      * Load and return the located version.
      *
-     * @return  The major version.
+     * @return  The JNI file that was successfully loaded.
      * @throws WCSLibInitializationException    If none found.
      */
-    private static int loadNativeLibrary() throws WCSLibInitializationException {
-        for (int wcsLibMajorVersion : WCS_LIB_MAJOR_VERSIONS) {
-            try
-            {
-                LOGGER.info("Checking libWCS major version " + wcsLibMajorVersion);
-                NativeUtil.loadJNI(WCSLib.class.getClassLoader(), "libwcsLibJNI." + wcsLibMajorVersion);
+    private static String loadNativeLibrary() throws WCSLibInitializationException {
+        try {
+            final ClassLoader classLoader = WCSLib.class.getClassLoader();
+            for (final String libraryFile : NativeUtil.getResourceFiles(classLoader)) {
+                if (libraryFile.startsWith(JNI_SO_PREFIX)) {
+                    final String libraryName = libraryFile.substring(0, libraryFile.lastIndexOf("."));
+                    try {
+                        LOGGER.info("Checking library file " + libraryName);
+                        NativeUtil.loadJNI(classLoader, libraryName);
 
-                // Found one that is valid.
-                LOGGER.info("Checking libWCS major version " + wcsLibMajorVersion + ": OK");
+                        // Found one that is valid.
+                        LOGGER.info("Checking library file " + libraryName + ": OK");
 
-                return wcsLibMajorVersion;
+                        return libraryName;
+                    } catch (NativeInitializationException ex) {
+                        LOGGER.info("Checking library file " + libraryName + ": FAIL");
+                        // Check next version.
+                    }
+                } else {
+                    LOGGER.warn("Checking library file " + libraryFile + ": SKIP");
+                }
             }
-            catch (NativeInitializationException ex)
-            {
-                LOGGER.info("Checking libWCS major version " + wcsLibMajorVersion + ": NO");
-                // Check next version.
-            }
+        } catch (IOException ioException) {
+            throw new WCSLibInitializationException(ioException.getMessage(), -2, ioException);
         }
 
-        throw new WCSLibInitializationException("failed to load wcsLibJNI (checked WCSLib versions: "
-                                                + Arrays.toString(WCS_LIB_MAJOR_VERSIONS) + ")", -1);
+        throw new WCSLibInitializationException("failed to find a valid file beginning with " + JNI_SO_PREFIX, -1);
     }
 
     /**

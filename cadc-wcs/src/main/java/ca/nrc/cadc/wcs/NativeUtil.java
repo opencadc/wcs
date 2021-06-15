@@ -70,12 +70,17 @@
 package ca.nrc.cadc.wcs;
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 
@@ -83,27 +88,27 @@ import org.apache.log4j.Logger;
  *
  * @author pdowler
  */
-public class NativeUtil 
+public class NativeUtil
 {
     private static final Logger log = Logger.getLogger(NativeUtil.class);
 
     private NativeUtil() { }
-    
+
     static void loadJNI(ClassLoader cl, String name)
         throws NativeInitializationException
     {
         final UUID uuid = UUID.randomUUID();
         File tmpdir = new File(System.getProperty("java.io.tmpdir"));
         File tmp = new File(tmpdir, name + "-" + uuid + ".so");
-        
+
         try
         {
             String soname = name + ".so";
             URL url = cl.getResource(soname);
-            
+
             if (url == null)
                 throw new NativeInitializationException("not found via ClassLoader: " + soname);
-            
+
             log.debug("found: " + url);
             if (tmp.exists())
                 // already been here: impossible?
@@ -114,7 +119,6 @@ public class NativeUtil
                 URLConnection uc = url.openConnection();
                 uc.setUseCaches(false);
                 InputStream istream = uc.getInputStream();
-                //InputStream istream = url.openStream();
                 FileOutputStream ostream = new FileOutputStream(tmp);
                 byte[] buf = new byte[65536];
                 int nb = istream.read(buf);
@@ -145,5 +149,40 @@ public class NativeUtil
             log.error("failed to load shared library: " + tmp);
             throw new NativeInitializationException("failed to load shared lib: " + name, e);
         }
+    }
+
+    /**
+     * Obtain a recursive list of String resource names.  This will use the ThreadContext context class loader first,
+     * then fall back to the given class loader.
+     * @param classLoader   The fallback class loader if none found using the ThreadContext class loader.
+     * @return  List of String resource names, or empty list.  Never null.
+     * @throws IOException  For any class loading errors.
+     */
+    static List<String> getResourceFiles(final ClassLoader classLoader) throws IOException {
+        final List<String> filenames = new ArrayList<>();
+
+        for (final Enumeration<URL> urlEnumeration = NativeUtil.getResourceAsStream(classLoader);
+             urlEnumeration.hasMoreElements();) {
+
+            try (final InputStream inputStream = urlEnumeration.nextElement().openStream();
+                 final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String resource;
+                while ((resource = bufferedReader.readLine()) != null) {
+                    log.debug("Found resource " + resource);
+                    filenames.add(resource);
+                }
+            }
+        }
+
+        return filenames;
+    }
+
+    static Enumeration<URL> getResourceAsStream(final ClassLoader fallbackClassLoader) throws IOException {
+        final Enumeration<URL> urlEnumeration = NativeUtil.getContextClassLoader().getResources("");
+        return urlEnumeration == null ? fallbackClassLoader.getResources("") : urlEnumeration;
+    }
+
+    static ClassLoader getContextClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
     }
 }
