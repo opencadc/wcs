@@ -73,7 +73,6 @@ import ca.nrc.cadc.wcs.Transform.Result;
 import ca.nrc.cadc.wcs.exceptions.WCSLibInitializationException;
 import ca.nrc.cadc.wcs.exceptions.WCSLibRuntimeException;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.log4j.Logger;
@@ -90,6 +89,11 @@ final class WCSLib
 {
     private static final Logger LOGGER = Logger.getLogger(WCSLib.class);
     private static final String JNI_SO_PREFIX = "libwcsLibJNI";
+    private static final String[] JNI_FILES = new String[] {
+            JNI_SO_PREFIX + ".5.so",
+            JNI_SO_PREFIX + ".6.so",
+            JNI_SO_PREFIX + ".7.so",
+    };
 
     static
     {
@@ -110,29 +114,21 @@ final class WCSLib
      * @throws WCSLibInitializationException    If none found.
      */
     private static String loadNativeLibrary() throws WCSLibInitializationException {
-        try {
-            final ClassLoader classLoader = WCSLib.class.getClassLoader();
-            for (final String libraryFile : NativeUtil.getResourceFiles(classLoader)) {
-                if (libraryFile.startsWith(JNI_SO_PREFIX)) {
-                    final String libraryName = libraryFile.substring(0, libraryFile.lastIndexOf("."));
-                    try {
-                        LOGGER.info("Checking library file " + libraryName);
-                        NativeUtil.loadJNI(classLoader, libraryName);
+        final ClassLoader classLoader = WCSLib.class.getClassLoader();
+        for (final String libraryFile : JNI_FILES) {
+            final String libraryName = libraryFile.substring(0, libraryFile.lastIndexOf("."));
+            try {
+                LOGGER.info("Checking library file " + libraryName);
+                NativeUtil.loadJNI(classLoader, libraryName);
 
-                        // Found one that is valid.
-                        LOGGER.info("Checking library file " + libraryName + ": OK");
+                // Found one that is valid.
+                LOGGER.info("Checking library file " + libraryName + ": OK");
 
-                        return libraryName;
-                    } catch (NativeInitializationException ex) {
-                        LOGGER.info("Checking library file " + libraryName + ": FAIL");
-                        // Check next version.
-                    }
-                } else {
-                    LOGGER.warn("Checking library file " + libraryFile + ": SKIP");
-                }
+                return libraryName;
+            } catch (NativeInitializationException ex) {
+                LOGGER.info("Checking library file " + libraryName + ": FAIL");
+                // Check next version.
             }
-        } catch (IOException ioException) {
-            throw new WCSLibInitializationException(ioException.getMessage(), -2, ioException);
         }
 
         throw new WCSLibInitializationException("failed to find a valid file beginning with " + JNI_SO_PREFIX, -1);

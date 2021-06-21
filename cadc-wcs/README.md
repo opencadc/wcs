@@ -9,8 +9,9 @@ compiled and included inside the `cadc-wcs` JAR file and deployed during class l
 
 Beginning with version 2.1.0, the JNI binaries are linked against `WCSLib` major versions 5, 6, or 7 (which ever is found).  In the
 `src/main/resources` directory we've included JNI liked libraries.  To add support for a different version, simply build
-against that version of `WCSLib`, then copy the `libwcsLibJNI.so` to `src/main/resources/libwcsLibJNI.<version>.so` and it
-will be picked up.  To remove support, simply delete that `src/main/resources/libwcsLibJNI.<version>.so` file.
+against that version of `WCSLib`, then copy the `libwcsLibJNI.so` to `src/main/resources/libwcsLibJNI.<version>.so` and add 
+it to the array in `WCSLib.java`.  To remove support, simply delete that `src/main/resources/libwcsLibJNI.<version>.so` file from
+both the `src/main/resources` directory and the `WCSLib.java` file.
 
 ## Building & Testing
 
