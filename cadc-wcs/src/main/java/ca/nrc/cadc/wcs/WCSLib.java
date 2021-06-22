@@ -90,9 +90,9 @@ final class WCSLib
     private static final Logger LOGGER = Logger.getLogger(WCSLib.class);
     private static final String JNI_SO_PREFIX = "libwcsLibJNI";
     private static final String[] JNI_FILES = new String[] {
-            JNI_SO_PREFIX + ".5.so",
-            JNI_SO_PREFIX + ".6.so",
-            JNI_SO_PREFIX + ".7.so",
+            JNI_SO_PREFIX + ".7",
+            JNI_SO_PREFIX + ".6",
+            JNI_SO_PREFIX + ".5",
     };
 
     static
@@ -116,17 +116,16 @@ final class WCSLib
     private static String loadNativeLibrary() throws WCSLibInitializationException {
         final ClassLoader classLoader = WCSLib.class.getClassLoader();
         for (final String libraryFile : JNI_FILES) {
-            final String libraryName = libraryFile.substring(0, libraryFile.lastIndexOf("."));
             try {
-                LOGGER.info("Checking library file " + libraryName);
-                NativeUtil.loadJNI(classLoader, libraryName);
+                LOGGER.info("Checking library file " + libraryFile);
+                NativeUtil.loadJNI(classLoader, libraryFile);
 
                 // Found one that is valid.
-                LOGGER.info("Checking library file " + libraryName + ": OK");
+                LOGGER.info("Checking library file " + libraryFile + ": OK");
 
-                return libraryName;
+                return libraryFile;
             } catch (NativeInitializationException ex) {
-                LOGGER.info("Checking library file " + libraryName + ": FAIL");
+                LOGGER.info("Checking library file " + libraryFile + ": FAIL");
                 // Check next version.
             }
         }
