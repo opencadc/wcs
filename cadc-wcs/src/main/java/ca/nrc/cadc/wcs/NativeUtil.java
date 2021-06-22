@@ -83,26 +83,27 @@ import org.apache.log4j.Logger;
  *
  * @author pdowler
  */
-public class NativeUtil 
+public class NativeUtil
 {
     private static final Logger log = Logger.getLogger(NativeUtil.class);
 
     private NativeUtil() { }
-    
-    static void loadJNI(ClassLoader cl, String name, UUID uuid)
+
+    static void loadJNI(ClassLoader cl, String name)
         throws NativeInitializationException
     {
+        final UUID uuid = UUID.randomUUID();
         File tmpdir = new File(System.getProperty("java.io.tmpdir"));
-        File tmp = new File(tmpdir, name + "-" + uuid.toString() + ".so");
-        
+        File tmp = new File(tmpdir, name + "-" + uuid + ".so");
+
         try
         {
             String soname = name + ".so";
             URL url = cl.getResource(soname);
-            
+
             if (url == null)
                 throw new NativeInitializationException("not found via ClassLoader: " + soname);
-            
+
             log.debug("found: " + url);
             if (tmp.exists())
                 // already been here: impossible?
@@ -113,7 +114,6 @@ public class NativeUtil
                 URLConnection uc = url.openConnection();
                 uc.setUseCaches(false);
                 InputStream istream = uc.getInputStream();
-                //InputStream istream = url.openStream();
                 FileOutputStream ostream = new FileOutputStream(tmp);
                 byte[] buf = new byte[65536];
                 int nb = istream.read(buf);
@@ -141,7 +141,7 @@ public class NativeUtil
         }
         catch (Error e)
         {
-            log.error("failed to load shared lib", e);
+            log.error("failed to load shared library: " + tmp);
             throw new NativeInitializationException("failed to load shared lib: " + name, e);
         }
     }

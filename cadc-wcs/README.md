@@ -1,22 +1,40 @@
-CADC WCS 3.0
-============
+# CADC WCS 2.1.0
 
-The cadc-wcs library is the java interface to `wcslib` (http://www.atnf.csiro.au/people/mcalabre/WCS/).
+The `cadc-wcs` library is the java interface to `WCSLib` (http://www.atnf.csiro.au/people/mcalabre/WCS/).
 
-This library can be built on its own but testing and beyond requires `wcslib`. The JNI binding library is
+This library can be built on its own but testing and beyond requires `WCSLib`. The JNI binding library is
 compiled and included inside the `cadc-wcs` JAR file and deployed during class loading.
 
-Versions: 
-- cadc-wcs 1.x binaries on JCenter are linked against wcslib 4
-- cadc-wcs 2.x binaries on JCenter are linked against wcslib >= 5
-- cadc-wcs 3.x binaries on JCenter are linked against wcslib >= 7.4
+## Supported WCSLib versions
 
-Building & Testing
-------------------
+Beginning with version 2.1.0, the JNI binaries are linked against `WCSLib` major versions 5, 6, or 7 (which ever is found).  In the
+`src/main/resources` directory we've included JNI liked libraries.  To add support for a different version, simply build
+against that version of `WCSLib`, then copy the `libwcsLibJNI.so` to `src/main/resources/libwcsLibJNI.<version>.so` and add 
+it to the array in `WCSLib.java`.  To remove support, simply delete that `src/main/resources/libwcsLibJNI.<version>.so` file from
+both the `src/main/resources` directory and the `WCSLib.java` file.
 
-Gradle (>= 4.6) is used to build the Java, generate the JNI headers, compile the C, and link the Shared Object.  Due to
-the complexity of these moving pieces, they need to be run in a certain order:
+## Building & Testing
 
- 1. `>$ gradle -i -x test clean build` -- build the Java and compile the C.  Omit the tests as they're not ready yet.
- 1. `>$ gradle -i assembleSharedJar` -- Copy the Shared Object into the build folder and build the JAR file.  The Shared Object will be linked against the system's `libwcs.so`.
- 1. `>$ gradle -i test` -- Now run the tests as the JAR file is complete
+JDK 1.8 (or higher) is required.  The Gradle Wrapper is provided.
+
+### WCSLib
+
+### No JNI changes
+
+To use `cadc-wcs`, the `WCSLib` C library is required.  If it is not installed, you may skip the tests:
+
+ 1. `$> ./gradlew -i -x test clean build` -- build the JAR file if no `WCSLib` is installed.
+
+Or in an environment where `WCSLib` with a supported version (currently 5.x, 6.x, or 7.x) is installed:
+
+ 1. `$> ./gradlew -i clean build test` -- build the JAR file if no `WCSLib` is installed.
+
+### With JNI changes
+
+The `WCSLib` C library is required.
+
+1. `$> ./gradlew -i -b build-jni.gradle -x test clean build && ./gradlew -i assembleSharedJar` -- build the JAR file if no `WCSLib` is installed.
+
+Or in an environment where `WCSLib`with a supported version (currently 5.x, 6.x, or 7.x) is installed:
+
+1. `$> ./gradlew -i clean build test` -- build the JAR file if no `WCSLib` is installed.
