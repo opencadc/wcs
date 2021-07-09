@@ -235,6 +235,62 @@ public class WCSLibTest
         }
     }
 
+    @Test
+    public void testInvalidSpectralKeywords() {
+        try {
+            WCSKeywords keywords = getTranslateKeywords();
+            keywords.put("CTYPE1", "NoSuchCtype");
+            keywords.put("CUNIT1", "NoSuchCunit");
+            try {
+                Transform transform = new Transform(keywords);
+                transform.translate("WAVE-???");
+            } catch (WCSLibRuntimeException e) {
+                Assert.assertEquals("spectral keyword test", "Invalid subimage specification (no spectral axis).(12)", e.getMessage());
+            }
+
+            try {
+                Transform transform = new Transform(keywords);
+                transform.pix2sky(new double[]{1,2});
+            } catch (WCSLibRuntimeException e) {
+                Assert.assertEquals("spectral keyword test", "Invalid subimage specification (no spectral axis).(12)", e.getMessage());
+            }
+
+            try {
+                Transform transform = new Transform(keywords);
+                transform.sky2pix(new double[]{1,2});
+            } catch (WCSLibRuntimeException e) {
+                Assert.assertEquals("spectral keyword test", "Invalid subimage specification (no spectral axis).(12)", e.getMessage());
+            }
+
+            keywords.put("CTYPE1", "FREQ");
+            try {
+                Transform transform = new Transform(keywords);
+                transform.translate("WAVE-???");
+            } catch (WCSLibRuntimeException e) {
+                Assert.assertEquals("spectral keyword test", "Invalid coordinate transformation parameters(6)", e.getMessage());
+            }
+
+            try {
+                Transform transform = new Transform(keywords);
+                transform.pix2sky(new double[]{1,2});
+            } catch (WCSLibRuntimeException e) {
+                Assert.assertEquals("spectral keyword test", "Invalid coordinate transformation parameters(6)", e.getMessage());
+            }
+
+            try {
+                Transform transform = new Transform(keywords);
+                transform.sky2pix(new double[]{1,2});
+            } catch (WCSLibRuntimeException e) {
+                Assert.assertEquals("spectral keyword test", "Invalid coordinate transformation parameters(6)", e.getMessage());
+            }
+
+        } catch (Exception unexpected)
+        {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
+        }
+    }
+
     private static void doWCSTest(Transform transform, int NAXIS)
     {
         int NCOORD = 361;
