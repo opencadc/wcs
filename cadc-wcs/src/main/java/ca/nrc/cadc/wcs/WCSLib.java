@@ -234,6 +234,11 @@ final class WCSLib
         double[] pixcrd
     )
     {
+        // Bug fix for wcslib 6 only to check for invalid spectral CUNIT's
+        // which cause a segmentation fault.
+        // JB 2021.07.09
+        SpectralUtil.isValidCunit(ctype, cunit);
+        
         double[] world = new double[pixcrd.length];
         String[] worldUnits = new String[pixcrd.length];
         int status = wcsp2s(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole,
@@ -305,6 +310,11 @@ final class WCSLib
         double[] world
     )
     {
+        // Bug fix for wcslib 6 only to check for invalid spectral CUNIT's
+        // which cause a segmentation fault.
+        // JB 2021.07.09
+        SpectralUtil.isValidCunit(ctype, cunit);
+
         double[] pixcrd = new double[world.length];
         String[] pixcrdUnits = new String[pixcrd.length];
         int status = wcss2p(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole,
@@ -378,6 +388,10 @@ final class WCSLib
         String   spectral_ctype
     )
     {
+        // Bug fix for wcslib 6 only to check for invalid spectral CUNIT's
+        // which cause a segmentation fault.
+        // JB 2021.07.09
+        SpectralUtil.isValidCunit(ctype, cunit);
 
         int status = wcssptr(naxis, crpix, pc, cdelt, crval, cunit, ctype, lonpole, latpole,
                             restfrq, restwav, pvi, pvm, pvv, psi, psm, psv, cd, crota,
