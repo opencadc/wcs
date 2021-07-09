@@ -99,7 +99,8 @@ public class SpectralUtil
                                     final String[] cunits) 
         throws WCSLibRuntimeException {
 
-        if (ctypes.length == 0 || cunits.length == 0) {
+        if (ctypes == null || cunits == null || 
+            ctypes.length == 0 || cunits.length == 0) {
             return;
         }
 
