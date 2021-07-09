@@ -35,9 +35,9 @@ If JNI changes are made to wcslib.c, use the `build-jni.gradle` build file.
 
 The `WCSLib` C library is required. If it is not installed, skip running the unit tests using the `-x test` option:
 
-1. `$> ./gradlew -i -b build-jni.gradle -x test clean build && ./gradlew -i assembleSharedJar` -- build the JAR file 
+1. `$> ./gradlew -i -b build-jni.gradle -x test clean build && ./gradlew -i build` -- build the JAR file 
 and do not run the unit tests.
 
 Or in an environment where `WCSLib`with a supported version (currently 5.x, 6.x, or 7.x) is installed:
 
-1. `$> ./gradlew -i -b build-jni.gradle clean build test && ./gradlew -i assembleSharedJar` -- build the JAR file and run the unit tests.
+1. `$> ./gradlew -i -b build-jni.gradle clean build test && ./gradlew -i build` -- build the JAR file and run the unit tests.
