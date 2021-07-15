@@ -80,7 +80,8 @@ public class SpectralUtil
 
     final static List<String> SPECTRAL_CUNITS = Arrays.asList(
         "Hz", "kHz", "MHz", "GHz", "eV", "keV", "MeV", "GeV", 
-        "m", "cm", "mm", "um", "µm", "nm", "Angstrom", "A"
+        "m", "cm", "mm", "um", "µm", "nm", "Angstrom", "A",
+        "J", "/m", "m/s", "km/s", "rad/s"
     );
 
     /**
