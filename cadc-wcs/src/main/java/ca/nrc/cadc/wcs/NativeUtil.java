@@ -86,6 +86,16 @@ import org.apache.log4j.Logger;
 public class NativeUtil
 {
     private static final Logger log = Logger.getLogger(NativeUtil.class);
+    private static String extension = ".so";
+
+    // for OSX, use .dylib as the library filename extension
+    static {
+        String osName = System.getProperty("os.name").toLowerCase();
+        boolean isMacOs = osName.startsWith("mac os x");
+        if (isMacOs) {
+            extension = ".dylib";
+        }
+    }
 
     private NativeUtil() { }
 
@@ -94,11 +104,11 @@ public class NativeUtil
     {
         final UUID uuid = UUID.randomUUID();
         File tmpdir = new File(System.getProperty("java.io.tmpdir"));
-        File tmp = new File(tmpdir, name + "-" + uuid + ".so");
+        File tmp = new File(tmpdir, name + "-" + uuid + extension);
 
         try
         {
-            String soname = name + ".so";
+            String soname = name + extension;
             URL url = cl.getResource(soname);
 
             if (url == null)

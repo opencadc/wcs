@@ -93,6 +93,7 @@ final class WCSLib
             JNI_SO_PREFIX + ".7",
             JNI_SO_PREFIX + ".6",
             JNI_SO_PREFIX + ".5",
+            JNI_SO_PREFIX
     };
 
     static
