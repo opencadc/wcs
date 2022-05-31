@@ -20,8 +20,8 @@ package jsky.coords;
  * <b>134</b>, 1, 1984), Liske J.H. (Astron. Astrophys. <b>73</b>, 282, 1979).
  * Dates must be expressed in <em>Julian Years</em>.
  * </p><p>
- * The precession may be applied on unit vectors (mnemonic <tt>u</tt>), or
- * on equatorial coordinates (mnemonic <tt>q</tt>).</p>
+ * The precession may be applied on unit vectors (mnemonic <em>u</em>), or
+ * on equatorial coordinates (mnemonic <em>q</em>).</p>
  */
 public class JPrec {
 
