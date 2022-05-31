@@ -19,8 +19,19 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+        
+    - name: install wcslib-5.15 from source (ugh)
+      run: |
+        sudo apt-get update && sudo apt-get install -y curl gcc make \
+        && curl -Lv -o /tmp/wcslib.tar.bz2 https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/wcslib/5.15-1/wcslib_5.15.orig.tar.bz2 \
+        && cd /tmp/ \
+        && tar jxvf wcslib.tar.bz2 \
+        && cd wcslib-5.15 \
+        && ./configure --prefix=/usr \
+        && make && sudo make install
+
     - name: java build -- cadc-wcs
-      run: cd cadc-wcs && ../gradlew -info clean build javadoc
+      run: cd cadc-wcs && ../gradlew --info clean build javadoc
       
     - name: java build -- jsky
-      run: cd jsky && -info clean build javadoc
+      run: cd jsky && ../gradlew -info clean build javadoc
