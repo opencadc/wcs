@@ -31,7 +31,7 @@ jobs:
         && make && sudo make install
 
     - name: java build -- cadc-wcs
-      run: cd cadc-wcs && ../gradlew -info clean build javadoc
+      run: cd cadc-wcs && ../gradlew --info clean build javadoc
       
     - name: java build -- jsky
-      run: cd jsky && --info clean build javadoc
+      run: cd jsky && ../gradlew -info clean build javadoc
