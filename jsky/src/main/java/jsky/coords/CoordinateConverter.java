@@ -12,7 +12,6 @@ import java.awt.geom.*;
  * convert between different coordinate systems, optionally including world
  * coordinates. Methods are available for converting between the following
  * coordinate systems:
- * <p>
  * <DL>
  *  <DT>Screen Coordinates</DT>
  *  <DD> The origin (0,0) is always at the upper left corner of the window.

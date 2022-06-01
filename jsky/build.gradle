@@ -2,11 +2,10 @@ plugins {
     id 'java'
     id 'maven'
     id 'maven-publish'
-    id 'com.jfrog.bintray' version '1.8.5'
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
     mavenLocal()
 }
 
@@ -14,10 +13,7 @@ sourceCompatibility = 1.8
 
 group = 'org.opencadc'
 
-version = '1.0.0'
+version = '1.0.1'
 
 dependencies {
-    //compile 'log4j:log4j:1.2.17'
-    
-    //testCompile 'junit:junit:4.13'
 }
