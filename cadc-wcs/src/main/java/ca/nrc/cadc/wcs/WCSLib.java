@@ -92,7 +92,7 @@ final class WCSLib
     private static final String[] JNI_FILES = new String[] {
             JNI_SO_PREFIX + ".7",
             JNI_SO_PREFIX + ".6",
-            JNI_SO_PREFIX + ".5"
+            JNI_SO_PREFIX + ".5",
     };
 
     static
