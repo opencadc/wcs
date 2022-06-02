@@ -1,4 +1,5 @@
 import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id 'c'
@@ -27,6 +28,7 @@ dependencies {
 
 def tmpBuildDir = 'build/tmp'
 def baseHeadersDir = "${Jvm.current().javaHome}/include"
+def os = System.getProperty("os.name").toLowerCase()
 
 test {
     systemProperty "java.library.path", "/usr/local/lib:/usr/lib:/usr/lib64:" + System.getProperty("java.io.tmpdir")
@@ -47,6 +49,10 @@ def getSOFileLocation() {
     }
 
     if (!soFile.exists()) {
+        soFile = file('/usr/local/lib/libwcs.dylib')
+    }
+
+    if (!soFile.exists()) {
         throw new Error("No WCS SO file found.")
     }
 
@@ -64,7 +70,11 @@ model {
            }
 
             jni {
-                headers.srcDirs = [baseHeadersDir, baseHeadersDir + "/linux", tmpBuildDir]
+                if (os.contains("os x")) {
+                    headers.srcDirs = [baseHeadersDir, baseHeadersDir + "/darwin", tmpBuildDir]
+                } else {
+                    headers.srcDirs = [baseHeadersDir, baseHeadersDir + "/linux", tmpBuildDir]
+                }
             }
         }
     }
@@ -81,14 +91,19 @@ model {
 
             // Linux compatible flags only.  This will likely never run on MacOS or Windows due to linkage issues.
             binaries.all {
-                cCompiler.args '-fexceptions',
-                        '-ansi',
-                        '-std=c99',
-                        '-pedantic',
-                        '-Wall',
-                        '-Dx86_linux',
-                        '-D_POSIX_C_SOURCE=2',
-                        '-D_FILE_OFFSET_BITS=64'
+                if (os.contains("os x")) {
+                    cCompiler.args '-mmacosx-version-min=10.9'
+                    linker.args '-mmacos-version-min=10.9'
+                } else {
+                    cCompiler.args '-fexceptions',
+                            '-ansi',
+                            '-std=c99',
+                            '-pedantic',
+                            '-Wall',
+                            '-Dx86_linux',
+                            '-D_POSIX_C_SOURCE=2',
+                            '-D_FILE_OFFSET_BITS=64'
+                }
             }
         }
     }
@@ -105,8 +120,13 @@ task generateJniHeaders(type: JavaCompile) {
 }
 
 task copySharedLibrary(type: Copy) {
-    from "${buildDir}/libs/wcsLibJNI/shared/libwcsLibJNI.so"           // gradle >= 3
-    into file("${buildDir}/classes/java/main/")
+    if (os.contains("os x")) {
+        from "${buildDir}/libs/wcsLibJNI/shared/libwcsLibJNI.dylib"        // gradle >= 3
+        into file("${buildDir}/classes/java/main/")
+    } else {
+        from "${buildDir}/libs/wcsLibJNI/shared/libwcsLibJNI.so"           // gradle >= 3
+        into file("${buildDir}/classes/java/main/")
+    }
 }
 
 task assembleSharedJar(type: Jar) {
