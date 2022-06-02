@@ -1,4 +1,4 @@
-# CADC WCS 2.1.0
+# cadc-wcs-2.1
 
 The `cadc-wcs` library is the java interface to `WCSLib` (http://www.atnf.csiro.au/people/mcalabre/WCS/).
 
@@ -12,6 +12,9 @@ Beginning with version 2.1.0, the JNI binaries are linked against `WCSLib` major
 against that version of `WCSLib`, copy the `libwcsLibJNI.so` to `src/main/resources/libwcsLibJNI.<version>.so` and add 
 it to the array in `WCSLib.java`.  To remove support, delete the `src/main/resources/libwcsLibJNI.<version>.so` file from
 both the `src/main/resources` directory and the `WCSLib.java` file.
+
+The src tree now contains a build of libwcsLibJNI.7 for OS-X. This is expected to be useful to make life easier for
+developers working on code that uses this library and is known to work on 10.x and 11.x (at least).
 
 ## Building & Testing
 
