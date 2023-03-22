@@ -79,44 +79,41 @@ public class TemporalTest {
     private static final Logger log = Logger.getLogger(TemporalTest.class);
 
     static {
-        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.DEBUG);
+        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.INFO);
     }
 
     public TemporalTest() {
     }
 
     @Test
-    public void testTime() {
+    public void testTransform() {
         try {
-
             WCSKeywords wcs = new WCSKeywordsImpl();
-            wcs.put("COORDSYS", "ICRS");
             wcs.put("NAXIS", 1);
-            wcs.put("CTYPE1", "TIME-LOG");
-            wcs.put("CUNIT1", "TT");
-            wcs.put("CRPIX1", 0.0);
-            wcs.put("CRVAL1", 10.0);
-            wcs.put("CD1_1", 1.0E-3);
-            wcs.put("CD1_2", 0.0);
-            wcs.put("CD2_1", 0.0);
-            wcs.put("CD2_2", 1.0E-3);
+            wcs.put("CTYPE1", "TIME");
+            wcs.put("CUNIT1", "d");
+            wcs.put("CRPIX1", 0.5);
+            wcs.put("CRVAL1", 60000.0);
+            wcs.put("CDELT1", 0.01);
 
-            Transform trans = new Transform(wcs);
+            Transform transform = new Transform(wcs);
+            log.info("test linear time WCS Transform: " + transform);
 
-            log.info("testLinear WCS Transform: " + trans);
-
-            double[] pix = new double[2];
-            pix[0] = 500.0;
-            pix[1] = 500.0;
-            Transform.Result result = trans.pix2sky(pix);
+            double[] pix = {512, 0.0};
+            Transform.Result result = transform.pix2sky(pix);
             Assert.assertNotNull(result);
             Assert.assertNotNull(result.coordinates);
-            Assert.assertEquals(2, result.coordinates.length);
+            double[] coords = result.coordinates;
+            log.info(String.format("pix2sky[%s, %s] -> [%s, %s]", pix[0], pix[1], coords[0], coords[1]));
 
-            log.info(
-                "testLinear " + pix[0] + "," + pix[1] + " -> " + result.coordinates[0] + "," + result.coordinates[1]);
-            Assert.assertEquals("RA center", 10.5, result.coordinates[0], 0.001);
-            Assert.assertEquals("DEC center", 20.5, result.coordinates[1], 0.001);
+            double[] sky = {coords[0], coords[1]};
+            result = transform.sky2pix(sky);
+            Assert.assertNotNull(result);
+            Assert.assertNotNull(result.coordinates);
+            coords = result.coordinates;
+            log.info(String.format("sky2pix[%s, %s] -> [%s, %s]", sky[0], sky[1], coords[0], coords[1]));
+
+            Assert.assertEquals(pix[0], coords[0], 0.000000001);
 
         } catch (Exception unexpected) {
             log.error("unexpected exception", unexpected);
