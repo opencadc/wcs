@@ -1,0 +1,147 @@
+import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
+
+plugins {
+    id 'c'
+    id 'java'
+    id 'maven'
+    id 'application'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = 1.8
+group = 'org.opencadc'
+version = '1.0'
+
+dependencies {
+    implementation 'log4j:log4j:1.2.17'
+    implementation 'org.opencadc:cadc-util:[1.3.13,2.0.0)'
+    implementation 'org.opencadc:cadc-log:[1.1.3,2.0.0)'
+
+    testImplementation 'junit:junit:[4.13,5.0]'
+}
+
+def tmpBuildDir = 'build/tmp'
+def baseHeadersDir = "${Jvm.current().javaHome}/include"
+def os = System.getProperty("os.name").toLowerCase()
+
+test {
+    systemProperty "java.library.path", "/usr/local/lib:/usr/lib:/usr/lib64:" + System.getProperty("java.io.tmpdir")
+}
+
+def getSOFileLocation() {
+    def soFile = file('/usr/lib64/liberfa.so')
+    if (!soFile.exists()) {
+        soFile = file('/usr/lib/liberfa.so')
+    }
+
+    if (!soFile.exists()) {
+        soFile = file('/usr/local/lib/liberfa.so')
+    }
+
+    if (!soFile.exists()) {
+        soFile = file('/usr/lib/x86_64-linux-gnu/liberfa.so')
+    }
+
+    if (!soFile.exists()) {
+        soFile = file('/usr/local/lib/liberfa.dylib')
+    }
+
+    if (!soFile.exists()) {
+        throw new Error("No ERFA SO file found.")
+    }
+
+    return soFile
+}
+
+model {
+    repositories {
+        libs(PrebuiltLibraries) {
+           erfax {
+               binaries.withType(SharedLibraryBinary) {
+                   // swugly: check for liberfa.so in some places it might be
+                   sharedLibraryFile = getSOFileLocation()
+               }
+           }
+
+            jni {
+                if (os.contains("os x")) {
+                    headers.srcDirs = [baseHeadersDir, baseHeadersDir + "/darwin", tmpBuildDir]
+                } else {
+                    headers.srcDirs = [baseHeadersDir, baseHeadersDir + "/linux", tmpBuildDir]
+                }
+            }
+        }
+    }
+
+    components {
+        erfaLibJNI(NativeLibrarySpec) {
+
+            sources {
+                c {
+                    lib library: 'jni', linkage: 'api'
+                    lib library: 'erfax', linkage: 'shared'
+                }
+            }
+
+            // Linux compatible flags only.  This will likely never run on MacOS or Windows due to linkage issues.
+            binaries.all {
+                if (os.contains("os x")) {
+                    cCompiler.args '-mmacosx-version-min=10.9'
+                    linker.args '-mmacos-version-min=10.9'
+                } else {
+                    cCompiler.args '-fexceptions',
+                            '-ansi',
+                            '-std=c99',
+                            '-pedantic',
+                            '-Wall',
+                            '-Dx86_linux',
+                            '-D_POSIX_C_SOURCE=2',
+                            '-D_FILE_OFFSET_BITS=64'
+                }
+            }
+        }
+    }
+}
+
+task generateJniHeaders(type: JavaCompile) {
+    classpath = sourceSets.main.compileClasspath
+    destinationDir file("${tmpBuildDir}")
+    source = sourceSets.main.java
+    options.compilerArgs += [
+            '-h', file("${tmpBuildDir}"),
+            '-d', file("${tmpBuildDir}")
+    ]
+}
+
+task copySharedLibrary(type: Copy) {
+    if (os.contains("os x")) {
+        from "${buildDir}/resources/main/liberfaLibJNI.dylib"        // gradle >= 3
+        into file("${buildDir}/classes/java/main/")
+        from "${buildDir}/libs/erfaLibJNI/shared/liberfaLibJNI.dylib"        // gradle >= 3
+        into file("src/main/resources/")
+    } else {
+        from "${buildDir}/libs/erfaLibJNI/shared/liberfaLibJNI.so"           // gradle >= 3
+        into file("${buildDir}/classes/java/main/")
+    }
+}
+
+task assembleSharedJar(type: Jar) {
+    from(sourceSets.main.output)
+}
+
+// change the default order of task execution so it does:
+// - java compile,
+// - javah,
+// - .so construction,
+// - jar construction
+//
+jar.enabled = false
+classes.dependsOn generateJniHeaders
+assembleSharedJar.dependsOn copySharedLibrary
+compileTestJava.dependsOn copySharedLibrary, assembleSharedJar
