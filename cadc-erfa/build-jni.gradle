@@ -121,12 +121,10 @@ task generateJniHeaders(type: JavaCompile) {
 
 task copySharedLibrary(type: Copy) {
     if (os.contains("os x")) {
-        from "${buildDir}/resources/main/liberfaLibJNI.dylib"        // gradle >= 3
+        from "${buildDir}/resources/main/liberfaLibJNI.dylib"       // gradle >= 3
         into file("${buildDir}/classes/java/main/")
-        from "${buildDir}/libs/erfaLibJNI/shared/liberfaLibJNI.dylib"        // gradle >= 3
-        into file("src/main/resources/")
     } else {
-        from "${buildDir}/libs/erfaLibJNI/shared/liberfaLibJNI.so"           // gradle >= 3
+        from "${buildDir}/libs/erfaLibJNI/shared/liberfaLibJNI.so"  // gradle >= 3
         into file("${buildDir}/classes/java/main/")
     }
 }

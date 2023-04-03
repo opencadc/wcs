@@ -12,7 +12,7 @@ The JNI binary is linked against `ERFA` version 2.0.0. The `src/main/resources` 
 To add support for a different version, build against that version of `ERFA`, and copy the `liberfaLibJNI.so` 
 to `src/main/resources/`.
 
-The src tree now contains a build of liberfaLibJNI for OS-X. This is expected to be useful to make life easier for
+The src tree now contains a build of `liberfaLibJNI.dylib` for MacOS. This is expected to be useful to make life easier for
 developers working on code that uses this library and is known to work on 12.x (at least).
 
 ## Building & Testing

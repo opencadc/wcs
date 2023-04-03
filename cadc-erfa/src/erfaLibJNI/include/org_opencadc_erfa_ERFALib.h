@@ -9,19 +9,83 @@ extern "C" {
 #endif
 /*
  * Class:     org_opencadc_erfa_ERFALib
- * Method:    tai2tt
+ * Method:    eraTai2tt
  * Signature: (DD)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_tai2tt
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTai2tt
   (JNIEnv *, jclass, jdouble, jdouble);
 
 /*
  * Class:     org_opencadc_erfa_ERFALib
- * Method:    tt2tai
+ * Method:    eraTai2ut1
+ * Signature: (DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTai2ut1
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraTai2utc
  * Signature: (DD)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_tt2tai
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTai2utc
   (JNIEnv *, jclass, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraTt2tai
+ * Signature: (DD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTt2tai
+  (JNIEnv *, jclass, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraTt2ut1
+ * Signature: (DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTt2ut1
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraUt12tai
+ * Signature: (DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUt12tai
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraUt12tt
+ * Signature: (DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUt12tt
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraUt12utc
+ * Signature: (DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUt12utc
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraUtc2tai
+ * Signature: (DD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUtc2tai
+  (JNIEnv *, jclass, jdouble, jdouble);
+
+/*
+ * Class:     org_opencadc_erfa_ERFALib
+ * Method:    eraUtc2ut1
+ * Signature: (DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUtc2ut1
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
 
 #ifdef __cplusplus
 }
