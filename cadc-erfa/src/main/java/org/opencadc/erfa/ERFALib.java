@@ -110,6 +110,84 @@ public class ERFALib {
     }
 
     /**
+     * <p>Convenience method to transform TT to UTC by calling TT to UT1 and UT1 to UTC.
+     * </p>
+     * <p>tt1+tt2 is a two part Julian Date, apportioned in any convenient
+     * way between the two arguments, for example where tt1 is the Julian
+     * Day Number and tt2 is the fraction of a day.  The returned
+     * utc1+utc2 form an analogous pair, except that a special convention
+     * is used, to deal with the problem of leap seconds.
+     * </p>
+     * <p>JD cannot unambiguously represent UTC during a leap second unless
+     * special measures are taken.  The convention in the present
+     * function is that the returned quasi-JD UTC1+UTC2 represents UTC
+     * days whether the length is 86399, 86400 or 86401 SI seconds.
+     * </p>
+     * <p>The argument dt is classical Delta T, TT-UT1 in seconds.
+     * </p>
+     * <p>Delta UT1 (dut1) can be obtained from tabulations provided by the
+     * International Earth Rotation and Reference Systems Service.  The
+     * value changes abruptly by 1s at a leap second;  however, close to
+     * a leap second the algorithm used here is tolerant of the "wrong"
+     * choice of value being made.
+     * </p>
+     * @param tt1,tt2 TT as a 2-part Julian Date.
+     * @param dt TT-UT1 in seconds.
+     * @param dut1 dut1 Delta UT1: UT1-UTC in seconds.
+     * @return UTC as a 2-part quasi Julian Date.
+     * @throws ERFALibException if an error occurs doing the transformation.
+     * @throws DubiousYearException if a date predates the introduction of the UTC timescale
+     *                              or are too far in the future to be trusted.
+     * @throws UnacceptableDateException if a date is so early that a Julian Date
+     *                                   could not be computed.
+     */
+    public static double[] tt2utc(double tt1, double tt2, double dt, double dut1)
+        throws ERFALibException, DubiousYearException, UnacceptableDateException {
+        double[] ut1 = tt2ut1(tt1, tt2, dt);
+        return ut12utc(ut1[0], ut1[1], dut1);
+    }
+
+    /**
+     * <p>Convenience method to transform UTC to TT by calling UTC to UT1 and UT1 to TT.
+     * </p>
+     * <p>utc1+utc2 is a 2-part Julian Date, apportioned in any convenient way
+     * between the two arguments, for example where tai1 is the Julian
+     * Day Number and tai2 is the fraction of a day.  The returned
+     * tt1+tt2 follow suit.
+     * </p>
+     * <p>JD cannot unambiguously represent UTC during a leap second unless
+     * special measures are taken.  The convention in the present
+     * function is that the JD day represents UTC days whether the
+     * length is 86399, 86400 or 86401 SI seconds.  In the 1960-1972 era
+     * there were smaller jumps (in either direction) each time the
+     * linear UTC(TAI) expression was changed, and these "mini-leaps"
+     * are also included in the ERFA convention.
+     * </p>
+     * <p>Delta UT1 (dut1) can be obtained from tabulations provided by the
+     * International Earth Rotation and Reference Systems Service.  The
+     * value changes abruptly by 1s at a leap second;  however, close to
+     * a leap second the algorithm used here is tolerant of the "wrong"
+     * choice of value being made.
+     * </p>
+     * <p>The argument dt is classical Delta T, TT-UT1 in seconds.
+     * </p>
+     * @param utc1,utc2 UTC as a 2-part quasi Julian Date.
+     * @param dut1 dut1 Delta UT1: UT1-UTC in seconds,
+     * @param dt TT-UT1 in seconds.
+     * @return TT as a 2-part Julian Date.
+     * @throws ERFALibException if an error occurs doing the transformation.
+     * @throws DubiousYearException if a date predates the introduction of the UTC timescale
+     *                              or are too far in the future to be trusted.
+     * @throws UnacceptableDateException if a date is so early that a Julian Date
+     *                                   could not be computed.
+     */
+    public static double[] utc2tt(double utc1, double utc2, double dut1, double dt)
+        throws DubiousYearException, UnacceptableDateException, ERFALibException {
+        double[] ut1 = utc2ut1(utc1, utc2, dut1);
+        return ut12tt(ut1[0], ut1[1], dt);
+    }
+
+    /**
      * <p>Time scale transformation: International Atomic Time, TAI, to Terrestrial Time, TT.
      * </p>
      * <p>tai1+tai2 is a two part Julian Date, apportioned in any convenient
@@ -201,7 +279,7 @@ public class ERFALib {
      * Day Number and tt2 is the fraction of a day.  The returned ut11+ut12
      * follow suit.
      * </p>
-     * <p>The argument dt is classical Delta T.
+     * <p>The argument dt is classical Delta T, TT-UT1 in seconds.
      * </p>
      * @param tt1,tt2 TT as a 2-part Julian Date.
      * @param dt TT-UT1 in seconds.
@@ -242,7 +320,7 @@ public class ERFALib {
      * Day Number and ut12 is the fraction of a day.  The returned
      * tt1+tt2 follow suit.
      * </p>
-     * <p>The argument dt is classical Delta T.
+     * <p>The argument dt is classical Delta T, TT-UT1 in seconds.
      * </p>
      * @param ut11,ut12 UT1 as a 2-part Julian Date.
      * @param dt TT-UT1 in seconds.
@@ -294,8 +372,7 @@ public class ERFALib {
      * <p>utc1+utc2 is a 2-part Julian Date, apportioned in any convenient way
      * between the two arguments, for example where tai1 is the Julian
      * Day Number and tai2 is the fraction of a day.  The returned
-     * utc1+utc2 form an analogous pair, except that a special convention
-     * is used, to deal with the problem of leap seconds.
+     * tai1+tai2 follow suit.
      * </p>
      * <p>JD cannot unambiguously represent UTC during a leap second unless
      * special measures are taken.  The convention in the present

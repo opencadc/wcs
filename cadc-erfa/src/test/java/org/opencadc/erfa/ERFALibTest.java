@@ -92,6 +92,52 @@ public class ERFALibTest {
     }
 
     @Test
+    public void tt2utcRoundTripTest() {
+        try {
+            double tt1 = 2453750.5;
+            double tt2 = 0.892104561;
+            double dt = 64.8499;
+            double dut1 = 0.3341;
+
+            double[] utc = ERFALib.tt2utc(tt1, tt2, dt, dut1);
+            log.debug(String.format("tt[%s, %s] -> utc[%s, %s]", tt1, tt2, utc[0], utc[1]));
+
+            double[] tt = ERFALib.utc2tt(utc[0], utc[1], dut1, dt);
+            log.debug(String.format("utc[%s, %s] -> tt[%s, %s]", utc[0], utc[1], tt[0], tt[1]));
+
+            Assert.assertEquals(tt1, tt[0], 1e-6);
+            Assert.assertEquals(tt2, tt[1], 1e-12);
+
+        } catch (Exception e) {
+            log.error("unexpected exception", e);
+            Assert.fail("unexpected exception: " + e);
+        }
+    }
+
+    @Test
+    public void utc2ttRoundTripTest() {
+        try {
+            double utc1 = 2453750.5;
+            double utc2 = 0.892100694;
+            double dt = 64.8499;
+            double dut1 = 0.3341;
+
+            double[] tt = ERFALib.utc2tt(utc1, utc2, dut1, dt);
+            log.debug(String.format("utc[%s, %s] -> tt[%s, %s]", utc1, utc2, tt[0], tt[1]));
+
+            double[] utc = ERFALib.tt2utc(tt[0], tt[1], dt, dut1);
+            log.debug(String.format("tt[%s, %s] -> utc[%s, %s]", utc[0], utc[1], tt[0], tt[1]));
+
+            Assert.assertEquals(utc1, utc[0], 1e-6);
+            Assert.assertEquals(utc2, utc[1], 1e-12);
+
+        } catch (Exception e) {
+            log.error("unexpected exception", e);
+            Assert.fail("unexpected exception: " + e);
+        }
+    }
+
+    @Test
     public void tai2ttTest() {
         try {
             double tai1 = 2453750.5;
