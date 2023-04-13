@@ -87,13 +87,14 @@ public class NativeUtil
 {
     private static final Logger log = Logger.getLogger(NativeUtil.class);
     private static String extension = ".so";
+    private static final String MACOS_EXTENSION = ".dylib";
 
     // for OSX, use .dylib as the library filename extension
     static {
         String osName = System.getProperty("os.name").toLowerCase();
         boolean isMacOs = osName.startsWith("mac os x");
         if (isMacOs) {
-            extension = ".dylib";
+            extension = NativeUtil.MACOS_EXTENSION;
         }
     }
 
@@ -134,6 +135,17 @@ public class NativeUtil
                 }
                 ostream.close();
                 log.debug("extracted: " + url.toExternalForm() + " -> " + tmp.getAbsolutePath());
+
+                if (NativeUtil.extension.equals(NativeUtil.MACOS_EXTENSION)) {
+                    log.info("Loading WCS main library");
+                    // Necessary to preload this on macOS.
+                    try {
+                        System.loadLibrary("wcs");
+                    } catch (UnsatisfiedLinkError unsatisfiedLinkError) {
+                        unsatisfiedLinkError.printStackTrace();
+                    }
+                    log.info("Loading WCS main library: OK");
+                }
 
                 System.load(tmp.getAbsolutePath());
                 log.debug("loaded: " + tmp.getAbsolutePath());
