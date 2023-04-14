@@ -123,17 +123,7 @@ public class ERFALib {
      * function is that the returned quasi-JD UTC1+UTC2 represents UTC
      * days whether the length is 86399, 86400 or 86401 SI seconds.
      * </p>
-     * <p>The argument dt is classical Delta T, TT-UT1 in seconds.
-     * </p>
-     * <p>Delta UT1 (dut1) can be obtained from tabulations provided by the
-     * International Earth Rotation and Reference Systems Service.  The
-     * value changes abruptly by 1s at a leap second;  however, close to
-     * a leap second the algorithm used here is tolerant of the "wrong"
-     * choice of value being made.
-     * </p>
      * @param tt1,tt2 TT as a 2-part Julian Date.
-     * @param dt TT-UT1 in seconds.
-     * @param dut1 dut1 Delta UT1: UT1-UTC in seconds.
      * @return UTC as a 2-part quasi Julian Date.
      * @throws ERFALibException if an error occurs doing the transformation.
      * @throws DubiousYearException if a date predates the introduction of the UTC timescale
@@ -141,10 +131,10 @@ public class ERFALib {
      * @throws UnacceptableDateException if a date is so early that a Julian Date
      *                                   could not be computed.
      */
-    public static double[] tt2utc(double tt1, double tt2, double dt, double dut1)
+    public static double[] tt2utc(double tt1, double tt2)
         throws ERFALibException, DubiousYearException, UnacceptableDateException {
-        double[] ut1 = tt2ut1(tt1, tt2, dt);
-        return ut12utc(ut1[0], ut1[1], dut1);
+        double[] tai = tt2tai(tt1, tt2);
+        return tai2utc(tai[0], tai[1]);
     }
 
     /**
@@ -163,17 +153,7 @@ public class ERFALib {
      * linear UTC(TAI) expression was changed, and these "mini-leaps"
      * are also included in the ERFA convention.
      * </p>
-     * <p>Delta UT1 (dut1) can be obtained from tabulations provided by the
-     * International Earth Rotation and Reference Systems Service.  The
-     * value changes abruptly by 1s at a leap second;  however, close to
-     * a leap second the algorithm used here is tolerant of the "wrong"
-     * choice of value being made.
-     * </p>
-     * <p>The argument dt is classical Delta T, TT-UT1 in seconds.
-     * </p>
      * @param utc1,utc2 UTC as a 2-part quasi Julian Date.
-     * @param dut1 dut1 Delta UT1: UT1-UTC in seconds,
-     * @param dt TT-UT1 in seconds.
      * @return TT as a 2-part Julian Date.
      * @throws ERFALibException if an error occurs doing the transformation.
      * @throws DubiousYearException if a date predates the introduction of the UTC timescale
@@ -181,10 +161,10 @@ public class ERFALib {
      * @throws UnacceptableDateException if a date is so early that a Julian Date
      *                                   could not be computed.
      */
-    public static double[] utc2tt(double utc1, double utc2, double dut1, double dt)
+    public static double[] utc2tt(double utc1, double utc2)
         throws DubiousYearException, UnacceptableDateException, ERFALibException {
-        double[] ut1 = utc2ut1(utc1, utc2, dut1);
-        return ut12tt(ut1[0], ut1[1], dt);
+        double[] tai = utc2tai(utc1, utc2);
+        return tai2tt(tai[0], tai[1]);
     }
 
     /**
