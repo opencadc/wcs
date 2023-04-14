@@ -17,14 +17,6 @@ JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTai2tt
 
 /*
  * Class:     org_opencadc_erfa_ERFALib
- * Method:    eraTai2ut1
- * Signature: (DDD)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTai2ut1
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
-
-/*
- * Class:     org_opencadc_erfa_ERFALib
  * Method:    eraTai2utc
  * Signature: (DD)[D
  */
@@ -41,51 +33,11 @@ JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTt2tai
 
 /*
  * Class:     org_opencadc_erfa_ERFALib
- * Method:    eraTt2ut1
- * Signature: (DDD)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraTt2ut1
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
-
-/*
- * Class:     org_opencadc_erfa_ERFALib
- * Method:    eraUt12tai
- * Signature: (DDD)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUt12tai
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
-
-/*
- * Class:     org_opencadc_erfa_ERFALib
- * Method:    eraUt12tt
- * Signature: (DDD)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUt12tt
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
-
-/*
- * Class:     org_opencadc_erfa_ERFALib
- * Method:    eraUt12utc
- * Signature: (DDD)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUt12utc
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
-
-/*
- * Class:     org_opencadc_erfa_ERFALib
  * Method:    eraUtc2tai
  * Signature: (DD)[D
  */
 JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUtc2tai
   (JNIEnv *, jclass, jdouble, jdouble);
-
-/*
- * Class:     org_opencadc_erfa_ERFALib
- * Method:    eraUtc2ut1
- * Signature: (DDD)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_org_opencadc_erfa_ERFALib_eraUtc2ut1
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
 
 #ifdef __cplusplus
 }
