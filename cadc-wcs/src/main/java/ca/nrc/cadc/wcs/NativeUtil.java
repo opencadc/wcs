@@ -137,14 +137,15 @@ public class NativeUtil
                 log.debug("extracted: " + url.toExternalForm() + " -> " + tmp.getAbsolutePath());
 
                 if (NativeUtil.extension.equals(NativeUtil.MACOS_EXTENSION)) {
-                    log.info("Loading WCS main library");
+                    log.debug("Loading WCS main library for macOS");
                     // Necessary to preload this on macOS.
                     try {
                         System.loadLibrary("wcs");
                     } catch (UnsatisfiedLinkError unsatisfiedLinkError) {
+                        // Error is quietly swallowed otherwise...
                         unsatisfiedLinkError.printStackTrace();
                     }
-                    log.info("Loading WCS main library: OK");
+                    log.debug("Loading WCS main library for macOS: OK");
                 }
 
                 System.load(tmp.getAbsolutePath());
