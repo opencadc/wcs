@@ -13,7 +13,15 @@ To add support for a different version, build against that version of `ERFA`, an
 to `src/main/resources/`.
 
 The src tree now contains a build of `liberfaLibJNI.dylib` for MacOS. This is expected to be useful to make life easier for
-developers working on code that uses this library and is known to work on 12.x (at least).
+developers working on code that uses this library and and is compatible with MacOS versions 11.x, 12.x, and 13.x. 
+If a 10.x version of the library is required, the library can be rebuilt following `With JNI changes` below. 
+The new library, in `build/libs/erfaLibJNI/shared/` should be copied into `src/main/resources` to be included in the jar file.
+
+The MacOS JNI library uses a hardcoded path to the locally installed ERFA C library. The included JNI library was built
+using a `homebrew` install of the ERFA C library in `/usr/local/opt/`. If the local ERFA C library uses a different path,
+the JNI library can be rebuilt using `With JNI changes` below.
+
+
 
 ## Building & Testing
 
