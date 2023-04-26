@@ -13,8 +13,14 @@ against that version of `WCSLib`, copy the `libwcsLibJNI.so` to `src/main/resour
 it to the array in `WCSLib.java`.  To remove support, delete the `src/main/resources/libwcsLibJNI.<version>.so` file from
 both the `src/main/resources` directory and the `WCSLib.java` file.
 
-The src tree now contains a build of libwcsLibJNI.7 for OS-X. This is expected to be useful to make life easier for
-developers working on code that uses this library and is known to work on 10.x and 11.x (at least).
+The src tree now contains a build of libwcsLibJNI.7.dylib for MacOS. This is expected to be useful to make life easier for
+developers working on code that uses this library and is compatible with MacOS versions 11.x, 12.x, and 13.x. If a 10.x version
+of the library is required, the library can be rebuilt following `With JNI changes` below. The new library,
+in `build/libs/wcsLibJNI/shared/` should be copied into `src/main/resources` to be included in the jar file.
+
+The MacOS JNI library uses a hardcoded path to the locally installed WCSLib C library. The included JNI library was built 
+using a `homebrew` install of the WCSLib C library in `/usr/local/opt/`. If the local WCSLib C library uses a different path, 
+the JNI library can be rebuilt using `With JNI changes` below.
 
 ## Building & Testing
 

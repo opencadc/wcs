@@ -92,8 +92,8 @@ model {
             // Linux compatible flags only.  This will likely never run on MacOS or Windows due to linkage issues.
             binaries.all {
                 if (os.contains("os x")) {
-                    cCompiler.args '-mmacosx-version-min=10.9'
-                    linker.args '-mmacos-version-min=10.9'
+                    cCompiler.args '-mmacosx-version-min=11.0'
+                    linker.args '-mmacos-version-min=11.0'
                 } else {
                     cCompiler.args '-fexceptions',
                             '-ansi',

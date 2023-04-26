@@ -62,49 +62,62 @@
  *  <http://www.gnu.org/licenses/>.      pas le cas, consultez :
  *                                       <http://www.gnu.org/licenses/>.
  *
- *  $Revision: 5 $
+ *  : 5 $
  *
  ************************************************************************
  */
 
 package ca.nrc.cadc.wcs;
 
-import ca.nrc.cadc.wcs.exceptions.NoSuchKeywordException;
+import ca.nrc.cadc.util.Log4jInit;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
 
-/**
- * @author pdowler
- */
-public class VerifyWCS implements Runnable {
-    private static final Logger log = Logger.getLogger(VerifyWCS.class);
+public class TemporalTest {
+    private static final Logger log = Logger.getLogger(TemporalTest.class);
 
-    public VerifyWCS() {
+    static {
+        Log4jInit.setLevel("ca.nrc.cadc.wcs", Level.INFO);
     }
 
-    public void run() {
+    public TemporalTest() {
+    }
+
+    @Test
+    public void testTransform() {
         try {
-            WCSKeywordsImpl wcs = new WCSKeywordsImpl();
-            wcs.put("SPECSYS", "TOPOCENT");
+            WCSKeywords wcs = new WCSKeywordsImpl();
             wcs.put("NAXIS", 1);
-            wcs.put("CTYPE1", "FREQ");
-            wcs.put("CUNIT1", "kHz");
-            wcs.put("NAXIS1", 1000);
+            wcs.put("CTYPE1", "TIME");
+            wcs.put("CUNIT1", "d");
             wcs.put("CRPIX1", 0.5);
-            wcs.put("CRVAL1", 200.0);
-            wcs.put("CDELT1", 1.0); // 200-1200
-            Transform trans = new Transform(wcs);
-            trans.sky2pix(new double[] { 600.0 });
-            trans.pix2sky(new double[] { 200.0 });
+            wcs.put("CRVAL1", 60000.0);
+            wcs.put("CDELT1", 0.01);
 
-            WCSKeywords kw = trans.translate("WAVE-???");
-            Transform trans2 = new Transform(kw);
+            Transform transform = new Transform(wcs);
+            log.info("test linear time WCS Transform: " + transform);
 
-            double wav = 0.5; // m
-            trans2.sky2pix(new double[] { wav });
-            trans2.pix2sky(new double[] { 200.0 });
-            log.debug("verified WCS transform");
-        } catch (NoSuchKeywordException bug) {
-            throw new RuntimeException("BUG: verify failed", bug);
+            double[] pix = {512, 0.0};
+            Transform.Result result = transform.pix2sky(pix);
+            Assert.assertNotNull(result);
+            Assert.assertNotNull(result.coordinates);
+            double[] coords = result.coordinates;
+            log.info(String.format("pix2sky[%s, %s] -> [%s, %s]", pix[0], pix[1], coords[0], coords[1]));
+
+            double[] sky = {coords[0], coords[1]};
+            result = transform.sky2pix(sky);
+            Assert.assertNotNull(result);
+            Assert.assertNotNull(result.coordinates);
+            coords = result.coordinates;
+            log.info(String.format("sky2pix[%s, %s] -> [%s, %s]", sky[0], sky[1], coords[0], coords[1]));
+
+            Assert.assertEquals(pix[0], coords[0], 0.000000001);
+
+        } catch (Exception unexpected) {
+            log.error("unexpected exception", unexpected);
+            Assert.fail("unexpected exception: " + unexpected);
         }
     }
 
