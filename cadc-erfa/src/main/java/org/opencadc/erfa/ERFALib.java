@@ -75,17 +75,17 @@ import org.apache.log4j.Logger;
  * ERFA (Essential Routines for Fundamental Astronomy) C library. Specifically:
  * </p>
  * <code>
- * <li>TIA to TT</li>
- * <li>TAI to UTC</li>
- * <li>TT to TAI</li>
- * <li>UTC to TAI</li>
+ * TIA to TT
+ * TAI to UTC
+ * TT to TAI
+ * UTC to TAI
  * </code>
  * <p>where
  * </p>
  * <code>
- * <li>TAI - International Atomic Time</li>
- * <li>TT - Terrestrial Time</li>
- * <li>UTC - Coordinated Universal Time</li>
+ * TAI - International Atomic Time
+ * TT - Terrestrial Time
+ * UTC - Coordinated Universal Time
  * </code>
  */
 public class ERFALib {
@@ -116,7 +116,8 @@ public class ERFALib {
      * function is that the returned quasi-JD UTC1+UTC2 represents UTC
      * days whether the length is 86399, 86400 or 86401 SI seconds.
      * </p>
-     * @param tt1,tt2 TT as a 2-part Julian Date.
+     * @param tt1 TT as a 2-part Julian Date.
+     * @param tt2 TT as a 2-part Julian Date.
      * @return UTC as a 2-part quasi Julian Date.
      * @throws ERFALibException if an error occurs doing the transformation.
      * @throws DubiousYearException if a date predates the introduction of the UTC timescale
@@ -146,7 +147,8 @@ public class ERFALib {
      * linear UTC(TAI) expression was changed, and these "mini-leaps"
      * are also included in the ERFA convention.
      * </p>
-     * @param utc1,utc2 UTC as a 2-part quasi Julian Date.
+     * @param utc1 UTC as a 2-part quasi Julian Date.
+     * @param utc2 UTC as a 2-part quasi Julian Date.
      * @return TT as a 2-part Julian Date.
      * @throws ERFALibException if an error occurs doing the transformation.
      * @throws DubiousYearException if a date predates the introduction of the UTC timescale
@@ -168,7 +170,8 @@ public class ERFALib {
      * Day Number and tai2 is the fraction of a day.  The returned tt1,tt2
      * follow suit.
      * </p>
-     * @param tai1,tai2 TAI as a 2-part Julian Date
+     * @param tai1 TAI as a 2-part Julian Date
+     * @param tai2 TAI as a 2-part Julian Date
      * @return TT as a 2-part Julian Date.
      * @throws ERFALibException if an error occurs doing the conversion.
      **/
@@ -194,7 +197,8 @@ public class ERFALib {
      * linear UTC(TAI) expression was changed, and these "mini-leaps"
      * are also included in the ERFA convention.
      * </p>
-     * @param tai1,tai2 TAI as a 2-part Julian Date.
+     * @param tai1 TAI as a 2-part Julian Date.
+     * @param tai2 TAI as a 2-part Julian Date.
      * @return UTC as a 2-part quasi Julian Date.
      * @throws ERFALibException if an error occurs doing the transformation.
      * @throws DubiousYearException if a date predates the introduction of the UTC timescale
@@ -215,7 +219,8 @@ public class ERFALib {
      * Day Number and tt2 is the fraction of a day.  The returned tai1+tai2
      * follow suit.
      * </p>
-     * @param tt1,tt2 TT as a 2-part Julian Date
+     * @param tt1 TT as a 2-part Julian Date
+     * @param tt2 TT as a 2-part Julian Date
      * @return TAI as a 2-part Julian Date.
      * @throws ERFALibException if an error occurs doing the conversion.
      **/
@@ -240,7 +245,8 @@ public class ERFALib {
      * linear UTC(TAI) expression was changed, and these "mini-leaps"
      * are also included in the ERFA convention.
      * </p>
-     * @param utc1,utc2 UTC as a 2-part quasi Julian Date.
+     * @param utc1 UTC as a 2-part quasi Julian Date.
+     * @param utc2 UTC as a 2-part quasi Julian Date.
      * @return TAI as a 2-part Julian Date.
      * @throws ERFALibException if an error occurs doing the transformation.
      * @throws DubiousYearException if a date predates the introduction of the UTC timescale

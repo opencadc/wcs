@@ -32,6 +32,9 @@ jobs:
 
     - name: java build -- cadc-wcs
       run: cd cadc-wcs && ../gradlew --info clean build javadoc
+
+    - name: java build -- cadc-erfa
+      run: cd cadc-erfa && ../gradlew --info clean build javadoc
       
     - name: java build -- jsky
       run: cd jsky && ../gradlew -info clean build javadoc
