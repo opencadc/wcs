@@ -14,7 +14,7 @@ apply from: '../opencadc.gradle'
 
 sourceCompatibility = 1.8
 group = 'org.opencadc'
-version = '1.0'
+version = '1.0.0'
 
 description = 'OpenCADC ERFA JNI library'
 def git_url = 'https://github.com/opencadc/wcs'
