@@ -14,7 +14,7 @@ apply from: '../opencadc.gradle'
 
 sourceCompatibility = 1.8
 group = 'org.opencadc'
-version = '2.1.4'
+version = '2.2.0'
 
 description = 'OpenCADC WCS JNI library'
 def git_url = 'https://github.com/opencadc/wcs'
@@ -24,7 +24,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.opencadc:cadc-util:[1.6,2.0)'
+    implementation 'org.opencadc:cadc-util:[1.11,2.0)'
 
     testImplementation 'junit:junit:[4.13,5.0]'
 }
