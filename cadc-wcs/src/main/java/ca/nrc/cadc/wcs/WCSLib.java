@@ -3,7 +3,7 @@
  *******************  CANADIAN ASTRONOMY DATA CENTRE  *******************
  **************  CENTRE CANADIEN DE DONNÉES ASTRONOMIQUES  **************
  *
- *  (c) 2023.                            (c) 2023.
+ *  (c) 2024.                            (c) 2024.
  *  Government of Canada                 Gouvernement du Canada
  *  National Research Council            Conseil national de recherches
  *  Ottawa, Canada, K1A 0R6              Ottawa, Canada, K1A 0R6
@@ -86,8 +86,12 @@ import org.apache.log4j.Logger;
 final class WCSLib {
     private static final Logger LOGGER = Logger.getLogger(WCSLib.class);
     private static final String JNI_SO_PREFIX = "libwcsLibJNI";
-    private static final String[] JNI_FILES = new String[] { JNI_SO_PREFIX + ".7", JNI_SO_PREFIX + ".6",
-        JNI_SO_PREFIX + ".5", };
+    private static final String[] JNI_FILES = new String[] { 
+        JNI_SO_PREFIX + ".8",
+        JNI_SO_PREFIX + ".7",
+        JNI_SO_PREFIX + ".6",
+        JNI_SO_PREFIX + ".5"
+    };
 
     static {
         LOGGER.info("Loaded WCSLib major version " + WCSLib.loadNativeLibrary());
