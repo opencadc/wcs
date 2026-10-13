@@ -3,23 +3,21 @@
 The `cadc-erfa` library is the java interface to `ERFA (Essential Routines for Fundamental Astronomy)` 
 (https://github.com/liberfa/erfa).
 
-This library can be built on its own but testing and beyond requires `liberfa`, the ERFA C library. 
-The JNI binding library is compiled and included inside the `cadc-erfa` JAR file and deployed during class loading.
+The JNI binding and its ERFA shared-library dependency are included inside the `cadc-erfa` JAR file for Linux and
+macOS arm64 and deployed during class loading.
 
 ## Supported ERFA versions
 
-The JNI binary is linked against `ERFA` version 2.0.0. The `src/main/resources` directory includes the JNI linked library.
-To add support for a different version, build against that version of `ERFA`, and copy the `liberfaLibJNI.so` 
-to `src/main/resources/`.
+The JNI binary is linked against `ERFA` version 2.0.0. Native resources are organized under
+`src/main/resources/<os>/<architecture>/`, where `os` is `linux` or `osx` and the normalized Java architecture name is
+`aarch64` or `x86_64`. Each shared library retains its native filename. To replace a supported ERFA version, put the
+ERFA and JNI libraries in the corresponding directory and update the filenames in `ERFALib.java`.
 
-The src tree now contains a build of `liberfaLibJNI.dylib` for MacOS. This is expected to be useful to make life easier for
-developers working on code that uses this library and and is compatible with MacOS versions 11.x, 12.x, and 13.x. 
-If a 10.x version of the library is required, the library can be rebuilt following `With JNI changes` below. 
-The new library, in `build/libs/erfaLibJNI/shared/` should be copied into `src/main/resources` to be included in the jar file.
+The loader selects the directory matching the current operating system and architecture. The included
+`linux/aarch64/liberfaLibJNI.so` was built on Ubuntu 24.04 arm64 against ERFA 2.0.1.
 
-The MacOS JNI library uses a hardcoded path to the locally installed ERFA C library. The included JNI library was built
-using a `homebrew` install of the ERFA C library in `/usr/local/opt/`. If the local ERFA C library uses a different path,
-the JNI library can be rebuilt using `With JNI changes` below.
+The src tree contains macOS arm64 JNI and ERFA builds. The JNI dependency uses `@loader_path`, so no system or Homebrew
+ERFA installation is required at runtime. The bundled ERFA binary currently requires macOS 15 or later.
 
 
 
@@ -31,11 +29,14 @@ JDK 1.8 (or higher) is required.  The Gradle Wrapper is provided.
 
 ### No JNI changes
 
-To use `cadc-erfa`, the `ERFA` C library is required.  If it is not installed, skip running the unit tests using the `-x test` option:
+The JAR includes ERFA for Linux `aarch64` and `x86_64`, and macOS arm64, so no system ERFA package is required. The
+loader extracts and loads ERFA before loading the JNI binding.
+
+To build the JAR without running the unit tests:
 
  1. `$> ./gradlew -i -x test clean build` -- build the JAR file and do not run the unit tests.
 
-Or in an environment where `ERFA` with a supported version (currently 2.0.0) is installed:
+To build the JAR and run the unit tests:
 
  1. `$> ./gradlew -i clean build test` -- build the JAR file and run the unit tests.
 

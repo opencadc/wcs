@@ -84,67 +84,112 @@ import org.apache.log4j.Logger;
  */
 public class NativeUtil {
     private static final Logger log = Logger.getLogger(NativeUtil.class);
-    private static String extension = ".so";
+    private static final boolean IS_MAC_OS;
+    private static final String OPERATING_SYSTEM;
+    private static final String EXTENSION;
 
-    // for OSX, use .dylib as the library filename extension
     static {
         String osName = System.getProperty("os.name").toLowerCase();
-        boolean isMacOs = osName.startsWith("mac os x");
-        if (isMacOs) {
-            extension = ".dylib";
+        IS_MAC_OS = osName.startsWith("mac os x");
+        if (IS_MAC_OS) {
+            OPERATING_SYSTEM = "osx";
+            EXTENSION = ".dylib";
+        } else if (osName.startsWith("linux")) {
+            OPERATING_SYSTEM = "linux";
+            EXTENSION = ".so";
+        } else {
+            OPERATING_SYSTEM = null;
+            EXTENSION = null;
         }
     }
 
     private NativeUtil() {
     }
 
-    static void loadJNI(ClassLoader cl, String name)
+    static void loadJNI(ClassLoader cl, String name,
+                        String linuxDependencyFileName, String macDependencyFileName)
         throws NativeInitializationException {
+        if (OPERATING_SYSTEM == null) {
+            throw new NativeInitializationException(
+                "unsupported operating system: " + System.getProperty("os.name"));
+        }
+
+        String architecture = normalizeArchitecture(System.getProperty("os.arch"));
+        String dependencyFileName = IS_MAC_OS ? macDependencyFileName : linuxDependencyFileName;
+        String resourceDirectory = OPERATING_SYSTEM + "/" + architecture + "/";
+        String jniFileName = name + EXTENSION;
         final UUID uuid = UUID.randomUUID();
-        File tmpdir = new File(System.getProperty("java.io.tmpdir"));
-        File tmp = new File(tmpdir, name + "-" + uuid + extension);
+        File parent = new File(System.getProperty("java.io.tmpdir"));
+        File tmpdir = new File(parent, name + "-" + uuid);
 
         try {
-            String soname = name + extension;
-            URL url = cl.getResource(soname);
-
-            if (url == null) {
-                throw new NativeInitializationException("not found via ClassLoader: " + soname);
+            if (!tmpdir.mkdir()) {
+                throw new NativeInitializationException(
+                    "failed to create temporary directory: " + tmpdir.getAbsolutePath());
             }
+            tmpdir.deleteOnExit();
 
-            log.debug("found: " + url);
-            if (tmp.exists()) {
-                // already been here: impossible?
-                throw new NativeInitializationException("found pre-existing " + tmp.getAbsolutePath());
-            }
+            String dependencyResource = resourceDirectory + dependencyFileName;
+            File dependency = extractResource(cl, dependencyResource, tmpdir, dependencyFileName);
+            loadLibrary(dependency, dependencyResource);
 
-            try {
-                URLConnection uc = url.openConnection();
-                uc.setUseCaches(false);
-                InputStream istream = uc.getInputStream();
-                FileOutputStream ostream = new FileOutputStream(tmp);
-                byte[] buf = new byte[65536];
-                int nb = istream.read(buf);
-                while (nb != -1) {
-                    ostream.write(buf, 0, nb);
-                    nb = istream.read(buf);
-                }
-                ostream.close();
-                log.debug("extracted: " + url.toExternalForm() + " -> " + tmp.getAbsolutePath());
-
-                System.load(tmp.getAbsolutePath());
-                log.debug("loaded: " + tmp.getAbsolutePath());
-            } finally {
-                if (tmp.exists()) {
-                    tmp.deleteOnExit();
-                }
-            }
+            String jniResource = resourceDirectory + jniFileName;
+            File jni = extractResource(cl, jniResource, tmpdir, jniFileName);
+            loadLibrary(jni, jniResource);
         } catch (IOException ex) {
-            log.error("failed to load shared lib", ex);
-            throw new NativeInitializationException("failed to create temporary file: " + tmp.getAbsolutePath(), ex);
-        } catch (Error e) {
-            log.error("failed to load shared library: " + tmp);
-            throw new NativeInitializationException("failed to load shared lib: " + name, e);
+            log.error("failed to extract shared library", ex);
+            throw new NativeInitializationException(
+                "failed to extract shared library to: " + tmpdir.getAbsolutePath(), ex);
         }
+    }
+
+    private static File extractResource(ClassLoader cl, String resourceName, File tmpdir, String fileName)
+        throws IOException, NativeInitializationException {
+        URL url = cl.getResource(resourceName);
+        if (url == null) {
+            throw new NativeInitializationException("not found via ClassLoader: " + resourceName);
+        }
+
+        File tmp = new File(tmpdir, fileName);
+        if (tmp.exists()) {
+            throw new NativeInitializationException("found pre-existing " + tmp.getAbsolutePath());
+        }
+
+        log.debug("found: " + url);
+        URLConnection uc = url.openConnection();
+        uc.setUseCaches(false);
+        try (InputStream istream = uc.getInputStream();
+             FileOutputStream ostream = new FileOutputStream(tmp)) {
+            byte[] buf = new byte[65536];
+            int nb = istream.read(buf);
+            while (nb != -1) {
+                ostream.write(buf, 0, nb);
+                nb = istream.read(buf);
+            }
+        }
+        tmp.deleteOnExit();
+        log.debug("extracted: " + url.toExternalForm() + " -> " + tmp.getAbsolutePath());
+        return tmp;
+    }
+
+    private static void loadLibrary(File library, String resourceName) throws NativeInitializationException {
+        try {
+            System.load(library.getAbsolutePath());
+            log.debug("loaded: " + library.getAbsolutePath());
+        } catch (Error e) {
+            log.error("failed to load shared library: " + library);
+            throw new NativeInitializationException("failed to load shared lib: " + resourceName, e);
+        }
+    }
+
+    static String normalizeArchitecture(String architecture) {
+        String value = architecture.toLowerCase();
+        if ("arm64".equals(value)) {
+            return "aarch64";
+        }
+        if ("amd64".equals(value)) {
+            return "x86_64";
+        }
+        return value;
     }
 }
