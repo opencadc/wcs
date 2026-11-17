@@ -95,12 +95,20 @@ public class ERFALib {
     private static final String MAC_ERFA_LIBRARY_FILE = "liberfa.1.dylib";
 
     static {
+        log.info("Loaded ERAFLib " + ERFALib.loadNativeLibrary());
+    }
+
+    private static String loadNativeLibrary() throws ERFALibInitializationException {
         try {
+            log.info("Checking library file " + JNI_FILE);
             NativeUtil.loadJNI(
                 ERFALib.class.getClassLoader(), JNI_FILE,
                 LINUX_ERFA_LIBRARY_FILE, MAC_ERFA_LIBRARY_FILE);
-        } catch (NativeInitializationException e) {
+            log.info("Checking library file " + JNI_FILE + ": OK");
+            return JNI_FILE;
+        } catch (NativeInitializationException ex) {
             log.info("Checking library file " + JNI_FILE + ": FAIL");
+            throw new ERFALibInitializationException("failed to load " + JNI_FILE, ex);
         }
     }
 
